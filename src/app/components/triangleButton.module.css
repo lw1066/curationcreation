@@ -1,0 +1,26 @@
+.triangleButton {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  width: 0;
+  height: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  border-right: 40px solid rgba(255, 0, 0, 0.51);
+  border-bottom: 40px solid transparent;
+}
+
+.triangleButton:hover {
+  border-right-color: rgba(255, 0, 0, 1);
+}
+
+.buttonText {
+  position: fixed;
+  top: 8px;
+  right: 0px;
+  font-weight: bold;
+  color: white;
+  white-space: nowrap;
+}

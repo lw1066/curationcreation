@@ -1,0 +1,24 @@
+.loadMoreButton {
+  background-color: #4caf50; /* Green background */
+  color: white; /* White text color */
+  border: none; /* Remove default border */
+  border-radius: 50%; /* Make the button round */
+  width: 50px; /* Set width */
+  height: 50px; /* Set height */
+  display: flex; /* Flexbox for centering text */
+  align-items: center; /* Center text vertically */
+  justify-content: center; /* Center text horizontally */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-size: 0.875rem; /* Font size for the text */
+  transition: background-color 0.3s ease; /* Smooth background color transition */
+}
+
+.loadMoreButton:hover {
+  background-color: #106814; /* Darker green on hover */
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0; /* Add some space above the button */
+}

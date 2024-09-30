@@ -1,0 +1,48 @@
+/* Container for the grid */
+.resultsGrid {
+  display: grid;
+  grid-gap: 16px; /* Space between grid items */
+  max-width: 80%;
+  margin: 50px auto;
+}
+
+/* Default: 3 items per row on screens larger than 968px */
+@media (min-width: 968px) {
+  .resultsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 2 items per row for screens between 468px and 968px */
+@media (min-width: 468px) and (max-width: 967px) {
+  .resultsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 1 item per row on screens smaller than 468px */
+@media (max-width: 467px) {
+  .resultsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Style for individual item cards */
+.itemCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  margin: 0; /* Reset margin since grid handles spacing */
+}
+
+.title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.info {
+  font-size: 0.75rem;
+  font-weight: 200;
+}
