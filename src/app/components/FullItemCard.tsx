@@ -39,7 +39,7 @@ interface Item {
   origins?: Origin[];
   images?: {
     _iiif_image: string;
-    _images_meta?: ImageMeta[];
+    imagesMeta?: ImageMeta[];
   };
   provider?: string;
 }
@@ -64,15 +64,14 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
     ? `${item.images._iiif_image}/full/full/0/default.jpg`
     : "/images/no_image.png";
 
-  // Use the current image from _images_meta if it exists
-  const metaImages = item.images?._images_meta;
+  const metaImages = item.images?.imagesMeta;
   const currentImageUrl =
     metaImages && metaImages[currentImageIndex]
       ? `https://framemark.vam.ac.uk/collections/${metaImages[currentImageIndex].assetRef}/full/full/0/default.jpg`
       : imageUrl;
 
   return {
-    imageUrl: currentImageUrl, // Use the dynamic URL
+    imageUrl: currentImageUrl,
     title: [sanitizeHTML(item?.title || "Untitled")],
     makerName: item?.maker?.[0]?.name || "Not available",
     makerId: item?.maker?.[0]?.id || "",
@@ -83,7 +82,9 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
     materials: item?.materials?.map((material) => material.text) || [],
     techniques: item?.techniques?.map((technique) => technique.text) || [],
     origins: item?.origins?.map((origin) => origin.place.text) || [],
-    metaImagesCount: metaImages ? metaImages.length : 0, // Get number of images
+    metaImagesCount: item.images?.imagesMeta?.length
+      ? item.images?.imagesMeta?.length
+      : 0, // Get number of images
   };
 };
 
@@ -92,7 +93,6 @@ const VaItemDisplay = ({
   close,
   handleMakerSearch,
 }: VaItemDisplayProps) => {
-  // State to manage the current image index
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -110,13 +110,10 @@ const VaItemDisplay = ({
     metaImagesCount,
   } = prepareItemData(item, currentImageIndex);
 
-  console.log(item);
-
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
   };
 
-  // Handlers for next/previous buttons
   const handleNextImage = () => {
     if (currentImageIndex < metaImagesCount - 1) {
       setLoading(true);
@@ -150,7 +147,6 @@ const VaItemDisplay = ({
           />
         </div>
 
-        {/* Buttons to navigate between images */}
         {metaImagesCount > 1 && (
           <div className={classes.imageControls}>
             <button

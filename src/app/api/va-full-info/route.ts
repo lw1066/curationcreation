@@ -1,15 +1,27 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 
+// Interface for artist maker person
 interface ArtistMakerPerson {
   name: { text: string; id?: string };
   association: { text: string; id?: string };
   note: string;
 }
 
+// Interface for Maker
 interface Maker {
   name: string;
   id?: string;
+}
+
+// Define types for the image structure
+interface ImageMeta {
+  assetRef: string; // Reference to the image asset
+}
+
+interface ImageResponse {
+  iiifImageUrl: string; // URL for the IIIF image
+  imagesMeta: ImageMeta[]; // Array of image metadata
 }
 
 // Define types for the response data
@@ -33,7 +45,7 @@ interface VAResponse {
     briefDescription?: string;
   };
   meta: {
-    images: string[];
+    images: { _iiif_image: string; _images_meta: ImageMeta[] }; // Updated to match the response structure
   };
 }
 
@@ -57,10 +69,11 @@ interface VAFullItem {
     date: { text: string };
     association: { text: string };
   }[];
-  images: any[];
+  images: ImageResponse; // Updated to use the new ImageResponse type
   briefDescription?: string;
 }
 
+// Handle POST request
 export async function POST(req: Request) {
   const { id }: RequestBody = await req.json();
 
@@ -78,6 +91,10 @@ export async function POST(req: Request) {
         }))
       : [{ name: "No maker", id: "No ID" }];
 
+    const images: ImageResponse = {
+      iiifImageUrl: vaResponse.data.meta.images._iiif_image,
+      imagesMeta: vaResponse.data.meta.images._images_meta,
+    };
     const vaFullItem: VAFullItem = {
       id: record.systemNumber,
       maker: makers,
@@ -88,7 +105,7 @@ export async function POST(req: Request) {
       techniques: record.techniques || [],
       origins: record.placesOfOrigin || [],
       productionDates: record.productionDates || [],
-      images: vaResponse.data.meta.images || [],
+      images: images, // Updated to use the structured images array
       briefDescription: record.briefDescription || "No description",
     };
 
