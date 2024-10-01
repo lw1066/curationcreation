@@ -88,7 +88,7 @@ const SearchPage: React.FC = () => {
 
     try {
       const response = await axios.post("/api/va-full-info", { id });
-      console.log(response.data.data.vaFullItem);
+
       setFullItem(response.data.data.vaFullItem);
     } catch (err) {
       setError(`An error occurred: ${err}`);

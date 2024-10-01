@@ -71,8 +71,6 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
       ? `https://framemark.vam.ac.uk/collections/${metaImages[currentImageIndex].assetRef}/full/full/0/default.jpg`
       : imageUrl;
 
-  console.log(item);
-
   return {
     imageUrl: currentImageUrl, // Use the dynamic URL
     title: [sanitizeHTML(item?.title || "Untitled")],
@@ -112,15 +110,7 @@ const VaItemDisplay = ({
     metaImagesCount,
   } = prepareItemData(item, currentImageIndex);
 
-  console.log(
-    makerId,
-    description,
-    physicalDescription,
-    materials,
-    techniques,
-    origins,
-    metaImagesCount
-  );
+  console.log(item);
 
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
