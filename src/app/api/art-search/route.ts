@@ -11,7 +11,7 @@ interface ArtSearchRequest {
 // Define types for the response structure
 interface VAMItem {
   id: string;
-  maker: string[];
+  maker: string;
   title: string;
   thumbnailUrl: string;
   baseImageUrl: string;

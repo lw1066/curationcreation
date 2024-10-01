@@ -6,7 +6,7 @@ interface VAResponse {
   record: {
     systemNumber: string;
     artistMakerPerson?: string; // This might be an object, adjust type if necessary
-    titles?: string;
+    titles?: [{ title: string; assigned: string }];
     summaryDescription?: string;
     physicalDescription?: string;
     materials?: string[];
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     const vaFullItem: VAFullItem = {
       id: record.systemNumber,
       maker: record.artistMakerPerson || "No maker",
-      title: record.titles || "No title",
+      title: record.titles?.[0]?.title || "No title",
       description: record.summaryDescription || "No description",
       physicalDescription: record.physicalDescription || "No description",
       materials: record.materials || [],

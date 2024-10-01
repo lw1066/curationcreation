@@ -33,7 +33,7 @@ interface ImageMeta {
 interface Item {
   id: string;
   maker?: Maker[];
-  title?: { title: string }[];
+  title?: string;
   description?: string;
   physicalDescription?: string;
   materials?: Material[];
@@ -73,9 +73,11 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
       ? `https://framemark.vam.ac.uk/collections/${metaImages[currentImageIndex].assetRef}/full/full/0/default.jpg`
       : imageUrl;
 
+  console.log(item);
+
   return {
     imageUrl: currentImageUrl, // Use the dynamic URL
-    title: sanitizeHTML(item?.title?.[0]?.title || "Untitled"),
+    title: [sanitizeHTML(item?.title || "Untitled")],
     makerName: item?.maker?.[0]?.name?.text || "Not available",
     makerId: item?.maker?.[0]?.name?.id || null,
     description: sanitizeHTML(item?.description || "No description available"),
@@ -112,6 +114,8 @@ const VaItemDisplay = ({
     metaImagesCount,
   } = prepareItemData(item, currentImageIndex);
 
+  console.log(title);
+
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
   };
@@ -141,7 +145,7 @@ const VaItemDisplay = ({
         <div className={classes.imageContainer}>
           <Image
             src={imageUrl}
-            alt={title}
+            alt={title[0]}
             fill={true}
             style={{ objectFit: "contain" }}
             quality={100}
@@ -174,7 +178,7 @@ const VaItemDisplay = ({
         <div className={classes.fullItemCard}>
           <h2
             className={classes.title}
-            dangerouslySetInnerHTML={{ __html: title }}
+            dangerouslySetInnerHTML={{ __html: title[0] }}
           ></h2>
           <p>
             <strong>Maker:</strong>{" "}

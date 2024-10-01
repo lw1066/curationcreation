@@ -8,7 +8,7 @@ import LoadMoreButton from "../components/LoadMoreButton";
 
 interface ArtItem {
   id: string;
-  title: any;
+  title: string;
   maker: any;
   date: string;
   baseImageUrl: string;
@@ -50,6 +50,7 @@ const SearchPage: React.FC = () => {
       });
 
       const fetchedResults = response.data.data.va;
+      console.log(fetchedResults);
 
       // Update the results and pagination
       setResults((prevResults) => ({
@@ -60,7 +61,7 @@ const SearchPage: React.FC = () => {
       }));
       setHasMore(fetchedResults.length === 15); // Check if more results are available
     } catch (err) {
-      setError("An error occurred while fetching data.");
+      setError(`An error occurred: ${err}`);
     } finally {
       setLoading(false);
     }
@@ -85,7 +86,7 @@ const SearchPage: React.FC = () => {
       const response = await axios.post("/api/va-full-info", { id });
       setFullItem(response.data.data.vaFullItem);
     } catch (err) {
-      setError("An error occurred while fetching data.");
+      setError(`An error occurred: ${err}`);
     } finally {
       setLoading(false);
     }
