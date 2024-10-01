@@ -1,20 +1,37 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 
+interface ArtistMakerPerson {
+  name: { text: string; id?: string }; // Assuming name has 'text' and possibly 'id'
+  association: { text: string; id?: string }; // Assuming association has 'text' and 'id'
+  note: string; // Note might be an optional string
+}
+
+interface Maker {
+  name: string; // name is a required field
+  id?: string; // id is an optional field
+}
+
 // Define types for the response data
 interface VAResponse {
   record: {
     systemNumber: string;
-    artistMakerPerson?: string; // This might be an object, adjust type if necessary
-    titles?: [{ title: string; assigned: string }];
+    artistMakerPerson?: ArtistMakerPerson[]; // This is now an array of objects
+    titles?: { title: string; type: string }[]; // 'type' replaces 'assigned' based on the structure you shared
     summaryDescription?: string;
     physicalDescription?: string;
-    materials?: string[];
-    techniques?: string[];
-    placesOfOrigin?: string[];
-    productionDates?: string[];
+    materials?: { text: string; id: string }[]; // Array of materials with 'text' and 'id'
+    techniques?: { text: string; id: string }[]; // Techniques as array with 'text' and 'id'
+    placesOfOrigin?: {
+      place: { text: string; id?: string };
+      association: { text: string };
+    }[]; // Adjust this based on structure
+    productionDates?: {
+      date: { text: string };
+      association: { text: string };
+    }[]; // Adjust based on actual data
     briefDescription?: string;
-    associatedObjects?: any[]; // Define a more specific type if you know the structure
+    associatedObjects?: any[];
   };
   meta: {
     images: any[]; // Define a more specific type if you know the structure of images
@@ -29,14 +46,20 @@ interface RequestBody {
 // Define the type for the full item response
 interface VAFullItem {
   id: string;
-  maker: string;
+  maker: Maker[];
   title: string;
   description: string;
   physicalDescription?: string;
-  materials?: string[];
-  techniques?: string[];
-  origins?: string[];
-  productionDates?: string[];
+  materials?: { text: string; id: string }[];
+  techniques?: { text: string; id: string }[];
+  origins?: {
+    place: { text: string; id?: string };
+    association: { text: string };
+  }[];
+  productionDates?: {
+    date: { text: string };
+    association: { text: string };
+  }[];
   images: any[]; // Define a more specific type if you know the structure of images
   briefDescription?: string;
   associatedObjects?: any[]; // Define a more specific type if you know the structure
@@ -52,13 +75,20 @@ export async function POST(req: Request) {
 
     const record = vaResponse.data.record;
 
+    const makers = record.artistMakerPerson
+      ? record.artistMakerPerson.map((person) => ({
+          name: person.name.text,
+          id: person.name.id || "No ID", // Provide fallback if 'id' is missing
+        }))
+      : [{ name: "No maker", id: "No ID" }];
+
     const vaFullItem: VAFullItem = {
       id: record.systemNumber,
-      maker: record.artistMakerPerson || "No maker",
-      title: record.titles?.[0]?.title || "No title",
+      maker: makers,
+      title: record.titles?.[0]?.title || "Untitled",
       description: record.summaryDescription || "No description",
       physicalDescription: record.physicalDescription || "No description",
-      materials: record.materials || [],
+      materials: record.materials || [{ text: "none", id: "none" }],
       techniques: record.techniques || [],
       origins: record.placesOfOrigin || [],
       productionDates: record.productionDates || [],

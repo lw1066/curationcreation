@@ -6,10 +6,15 @@ import classes from "./artSearch.module.css";
 import VaItemDisplay from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
 
+interface Maker {
+  name: string;
+  id?: string;
+}
+
 interface ArtItem {
   id: string;
   title: string;
-  maker: any;
+  maker: Maker[];
   date: string;
   baseImageUrl: string;
 }
@@ -50,7 +55,6 @@ const SearchPage: React.FC = () => {
       });
 
       const fetchedResults = response.data.data.va;
-      console.log(fetchedResults);
 
       // Update the results and pagination
       setResults((prevResults) => ({
@@ -84,6 +88,7 @@ const SearchPage: React.FC = () => {
 
     try {
       const response = await axios.post("/api/va-full-info", { id });
+      console.log(response.data.data.vaFullItem);
       setFullItem(response.data.data.vaFullItem);
     } catch (err) {
       setError(`An error occurred: ${err}`);
@@ -200,7 +205,7 @@ const SearchPage: React.FC = () => {
                   />
                 </div>
                 <p className={classes.title}>{item.title}</p>
-                <p className={classes.info}>{item.maker}</p>
+                <p className={classes.info}>{item.maker[0].name}</p>
                 <p className={classes.info}>{item.date}</p>
               </div>
             ))}

@@ -6,10 +6,8 @@ import TriangleButton from "./TriangleButton";
 
 // Define types for item data structures
 interface Maker {
-  name: {
-    text: string;
-    id: string | null;
-  };
+  name: string;
+  id?: string;
 }
 
 interface Material {
@@ -78,8 +76,8 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
   return {
     imageUrl: currentImageUrl, // Use the dynamic URL
     title: [sanitizeHTML(item?.title || "Untitled")],
-    makerName: item?.maker?.[0]?.name?.text || "Not available",
-    makerId: item?.maker?.[0]?.name?.id || null,
+    makerName: item?.maker?.[0]?.name || "Not available",
+    makerId: item?.maker?.[0]?.id || "",
     description: sanitizeHTML(item?.description || "No description available"),
     physicalDescription: sanitizeHTML(
       item?.physicalDescription || "No physical description available"
@@ -114,7 +112,15 @@ const VaItemDisplay = ({
     metaImagesCount,
   } = prepareItemData(item, currentImageIndex);
 
-  console.log(title);
+  console.log(
+    makerId,
+    description,
+    physicalDescription,
+    materials,
+    techniques,
+    origins,
+    metaImagesCount
+  );
 
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
