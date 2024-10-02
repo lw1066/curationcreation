@@ -94,7 +94,7 @@ const VaItemDisplay = ({
   handleMakerSearch,
 }: VaItemDisplayProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   // Prepare item data based on the current image index
   const {
@@ -136,6 +136,11 @@ const VaItemDisplay = ({
     <div className={classes.overlay} onClick={close}>
       <div className={classes.centeredContainer} onClick={handleClickInside}>
         <div className={classes.imageContainer}>
+          {loading && (
+            <div className={classes.spinnerContainer}>
+              <div className={classes.spinner}></div>
+            </div>
+          )}
           <Image
             src={imageUrl}
             alt={title[0]}

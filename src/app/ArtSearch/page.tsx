@@ -38,6 +38,9 @@ const SearchPage: React.FC = () => {
   const [page, setPage] = useState<number>(1);
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [onlyWithImages, setOnlyWithImages] = useState<boolean>(false);
+  const [imageLoadingStatus, setImageLoadingStatus] = useState<{
+    [id: string]: boolean;
+  }>({});
 
   const fetchSearchResults = async ({
     searchQuery,
@@ -172,6 +175,13 @@ const SearchPage: React.FC = () => {
     2000
   );
 
+  const handleImageLoad = (id: string) => {
+    setImageLoadingStatus((prevState) => ({
+      ...prevState,
+      [id]: false,
+    }));
+  };
+
   return (
     <div>
       {fullItem && (
@@ -243,7 +253,11 @@ const SearchPage: React.FC = () => {
         </div>
       </div>
 
-      {loading && <p>Loading...</p>}
+      {loading && (
+        <div className={classes.spinnerContainer}>
+          <div className={classes.spinner}></div>
+        </div>
+      )}
       {error && <p>{error}</p>}
 
       <div>
@@ -258,6 +272,12 @@ const SearchPage: React.FC = () => {
                     height: "200px",
                   }}
                 >
+                  {imageLoadingStatus[item.id] !== false && (
+                    <div className={classes.spinnerContainer}>
+                      <div className={classes.spinner}></div>
+                    </div>
+                  )}
+
                   <Image
                     src={
                       item.baseImageUrl === "/images/no_image.png"
@@ -269,6 +289,7 @@ const SearchPage: React.FC = () => {
                     quality={100}
                     style={{ objectFit: "contain" }}
                     alt={item.title}
+                    onLoad={() => handleImageLoad(item.id)}
                     onClick={() => handleFullInfoRequest(item.id)}
                   />
                 </div>
