@@ -1,15 +1,18 @@
 import React from "react";
 import styles from "./loadMoreButton.module.css";
 
-// Define the props type for the LoadMoreButton component
 interface LoadMoreButtonProps {
-  onClick: () => void; // Function to be called on button click
-  disabled?: boolean; // Optional prop to disable the button
+  onClick: () => void;
+  disabled?: boolean;
+  text?: string;
+  fontSize?: string;
 }
 
 const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
   onClick,
   disabled,
+  text = "More",
+  fontSize = "16px",
 }) => {
   return (
     <div className={styles.buttonContainer}>
@@ -17,8 +20,9 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
         className={styles.loadMoreButton}
         onClick={onClick}
         disabled={disabled}
+        style={{ fontSize }}
       >
-        More
+        {text}
       </button>
     </div>
   );

@@ -19,12 +19,23 @@ interface VAMItem {
   date: string | null;
 }
 
+interface VAMItemsInfo {
+  version: string;
+  record_count: number;
+  record_count_exact: boolean;
+  page_size: number;
+  pages: number;
+  page: number;
+  image_count: number;
+}
+
 interface ArtSearchResponse {
   status: number;
   success: boolean;
   message: string;
   data?: {
     va: VAMItem[];
+    info: VAMItemsInfo;
   };
 }
 
@@ -73,6 +84,8 @@ export async function POST(req: Request) {
       });
     }
 
+    const vaItemsInfo: VAMItemsInfo = vaResponse.data.info;
+
     const vaItems: VAMItem[] = vaResponse.data.records.map(
       (record: VAMApiRecord) => ({
         id: record.systemNumber,
@@ -93,6 +106,7 @@ export async function POST(req: Request) {
       message: "Art retrieved!",
       data: {
         va: vaItems,
+        info: vaItemsInfo,
       },
     });
   } catch (error) {

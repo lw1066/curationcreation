@@ -5,6 +5,7 @@ import Image from "next/image";
 import classes from "./artSearch.module.css";
 import VaItemDisplay from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
+import useCountAnimation from "../components/useCountAnimation";
 
 interface Maker {
   name: string;
@@ -21,17 +22,21 @@ interface ArtItem {
 
 interface Results {
   va: ArtItem[];
+  info: { record_count: 0; image_count: 0 };
 }
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState<string>("");
   const [makerId, setMakerId] = useState<string | null>(null);
-  const [results, setResults] = useState<Results>({ va: [] });
+  const [results, setResults] = useState<Results>({
+    va: [],
+    info: { record_count: 0, image_count: 0 },
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [fullItem, setFullItem] = useState<ArtItem | null>(null);
   const [page, setPage] = useState<number>(1);
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [onlyWithImages, setOnlyWithImages] = useState<boolean>(false);
 
   const fetchSearchResults = async ({
@@ -54,16 +59,17 @@ const SearchPage: React.FC = () => {
         rows: 15,
       });
 
-      const fetchedResults = response.data.data.va;
+      const fetchedResults = response.data.data;
 
       // Update the results and pagination
       setResults((prevResults) => ({
         va:
           pageNum === 1
-            ? fetchedResults
-            : [...prevResults.va, ...fetchedResults], // Add new results on pagination
+            ? fetchedResults.va
+            : [...prevResults.va, ...fetchedResults.va],
+        info: fetchedResults.info, // Add new results on pagination
       }));
-      setHasMore(fetchedResults.length === 15); // Check if more results are available
+      setHasMore(fetchedResults.va.length === 15); // Check if more results are available
     } catch (err) {
       setError(`An error occurred: ${err}`);
     } finally {
@@ -75,10 +81,17 @@ const SearchPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setPage(1); // Reset to first page on new search
-    setResults({ va: [] }); // Clear previous results
+    setResults({
+      va: [],
+      info: { record_count: 0, image_count: 0 },
+    }); // Clear previous results
     setMakerId(null);
 
-    fetchSearchResults({ searchQuery: query, searchMakerId: null, pageNum: 1 });
+    await fetchSearchResults({
+      searchQuery: query,
+      searchMakerId: null,
+      pageNum: 1,
+    });
   };
 
   // Handle full info request for a specific item
@@ -100,7 +113,10 @@ const SearchPage: React.FC = () => {
   // Handle maker search by maker_id
   const handleMakerSearch = async (makerId: string) => {
     setPage(1);
-    setResults({ va: [] });
+    setResults({
+      va: [],
+      info: { record_count: 0, image_count: 0 },
+    });
     setMakerId(makerId);
 
     fetchSearchResults({
@@ -145,6 +161,17 @@ const SearchPage: React.FC = () => {
       )
     : results.va;
 
+  console.log(results);
+
+  const animatedRecordCount = useCountAnimation(
+    results.info.record_count || 0,
+    2000
+  );
+  const animatedImageCount = useCountAnimation(
+    results.info.image_count || 0,
+    2000
+  );
+
   return (
     <div>
       {fullItem && (
@@ -154,26 +181,67 @@ const SearchPage: React.FC = () => {
           handleMakerSearch={handleMakerSearch}
         />
       )}
-      <h1>Victoria & Albert Museum Art Search</h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter search query"
-          required
-        />
-        <button type="submit">Search</button>
-      </form>
+      <div className={classes.searchFormContainer}>
+        <div className={classes.vaSearchInstructionsContainer}>
+          <span className={classes.vaLogoContainer}>
+            <Image
+              className={classes.vaLogo}
+              src={"/images/Victoria_and_Albert_Museum_Logo.svg"}
+              alt="V and A logo"
+              width={80}
+              height={80}
+            />
+          </span>
+          <p>
+            The Victoria and Albert Museum catalogue has over 1 million items
+            (500k images) covering 5000 years of human creativity!{" "}
+          </p>
+        </div>
+        <form
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onSubmit={handleSubmit}
+        >
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Enter artist, place, type"
+            required
+            style={{ width: "65%" }}
+          />
 
-      <label>
-        <input
-          type="checkbox"
-          checked={onlyWithImages}
-          onChange={(e) => setOnlyWithImages(e.target.checked)} // Update checkbox state
-        />
-        Only show items with images
-      </label>
+          <LoadMoreButton onClick={() => {}} text="Search" fontSize="12px" />
+        </form>
+        <div className={classes.filtersContainer}>
+          <p>
+            <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+              {animatedRecordCount}
+            </span>{" "}
+            items found {"   "} with{" "}
+            <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+              {animatedImageCount}
+            </span>{" "}
+            images
+          </p>
+          <p style={{ fontWeight: "600", margin: "20px" }}>
+            Filter your results
+          </p>
+          <input
+            type="checkbox"
+            id="onlyWithImages"
+            checked={onlyWithImages}
+            onChange={(e) => setOnlyWithImages(e.target.checked)} // Update checkbox state
+          />
+          <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
+            Only show items with images
+          </label>
+        </div>
+      </div>
 
       {loading && <p>Loading...</p>}
       {error && <p>{error}</p>}

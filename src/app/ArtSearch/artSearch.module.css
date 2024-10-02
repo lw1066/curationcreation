@@ -6,6 +6,48 @@
   margin: 50px auto;
 }
 
+.searchFormContainer {
+  width: 60%;
+  margin: 20px auto;
+}
+
+.vaLogo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+}
+
+.vaLogoContainer {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border-radius: 50%;
+  margin: 20px 10px 20px 0;
+}
+
+.vaSearchInstructionsContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vaSearchInstructionsContainer p {
+  width: 50%;
+}
+
+.filtersContainer {
+  width: 80%;
+  margin: 10px auto;
+  text-align: center;
+}
+
 /* Default: 3 items per row on screens larger than 968px */
 @media (min-width: 968px) {
   .resultsGrid {
@@ -24,6 +66,16 @@
 @media (max-width: 467px) {
   .resultsGrid {
     grid-template-columns: 1fr;
+  }
+
+  .searchFormContainer {
+    width: 90%;
+    margin: 20px auto;
+  }
+
+  .vaSearchInstructionsContainer p {
+    width: 70%;
+    font-size: 0.9rem;
   }
 }
 

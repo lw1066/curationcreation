@@ -20,8 +20,8 @@ interface ImageMeta {
 }
 
 interface ImageResponse {
-  iiifImageUrl: string; // URL for the IIIF image
-  imagesMeta: ImageMeta[]; // Array of image metadata
+  iiifImageUrl: string | null;
+  imagesMeta: ImageMeta[] | null;
 }
 
 // Define types for the response data
@@ -83,6 +83,7 @@ export async function POST(req: Request) {
     );
 
     const record = vaResponse.data.record;
+    const metaRecord = vaResponse.data.meta;
 
     const makers = record.artistMakerPerson
       ? record.artistMakerPerson.map((person) => ({
@@ -92,9 +93,10 @@ export async function POST(req: Request) {
       : [{ name: "No maker", id: "No ID" }];
 
     const images: ImageResponse = {
-      iiifImageUrl: vaResponse.data.meta.images._iiif_image,
-      imagesMeta: vaResponse.data.meta.images._images_meta,
+      iiifImageUrl: metaRecord.images?._iiif_image || null,
+      imagesMeta: metaRecord.images?._images_meta || null,
     };
+
     const vaFullItem: VAFullItem = {
       id: record.systemNumber,
       maker: makers,
