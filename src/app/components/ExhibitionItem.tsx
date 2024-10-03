@@ -130,7 +130,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
 
       <div className={classes.imageButtonsContainer}>
         <button className={classes.infoButton} onClick={handleInfoClick}>
-          Info
+          {showInfo ? "Close" : "Info"}
         </button>
 
         {metaImagesCount > 1 && (

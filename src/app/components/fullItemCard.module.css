@@ -126,6 +126,17 @@
   z-index: 9999;
 }
 
+.exhibitionButton {
+  color: #e74c3c;
+  background-color: transparent;
+  border: 2px solid #e74c3c;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10px;
+  height: 60px;
+  width: 60px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

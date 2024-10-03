@@ -6,6 +6,8 @@ interface LoadMoreButtonProps {
   disabled?: boolean;
   text?: string;
   fontSize?: string;
+  width?: string;
+  height?: string;
 }
 
 const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
@@ -13,6 +15,8 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
   disabled,
   text = "More",
   fontSize = "12px",
+  width = "40px",
+  height = "40px",
 }) => {
   return (
     <div className={styles.buttonContainer}>
@@ -20,7 +24,7 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
         className={styles.loadMoreButton}
         onClick={onClick}
         disabled={disabled}
-        style={{ fontSize }}
+        style={{ fontSize, width, height }}
       >
         {text}
       </button>

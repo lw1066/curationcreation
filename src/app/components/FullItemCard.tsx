@@ -207,8 +207,7 @@ const VaItemDisplay = ({
               disabled={currentImageIndex === 0 || loading}
               text="Back"
             />
-
-            <p style={{ fontSize: ".5rem", lineHeight: "50px" }}>More images</p>
+            <p style={{ fontSize: ".5rem", lineHeight: "40px" }}>More images</p>
             <LoadMoreButton
               onClick={handleNextImage}
               disabled={currentImageIndex === metaImagesCount - 1 || loading}
@@ -221,7 +220,8 @@ const VaItemDisplay = ({
           <h2
             className={classes.title}
             dangerouslySetInnerHTML={{ __html: title[0] }}
-          ></h2>
+          />
+
           <p>
             <strong>Maker:</strong>{" "}
             {makerId ? (
@@ -285,21 +285,30 @@ const VaItemDisplay = ({
               <span>Not listed</span>
             )}
           </div>
-          {isInExhibition ? (
-            <button
-              className={classes.exhibitionButton}
-              onClick={removeItemFromExhibition}
-            >
-              Remove from Exhibition
-            </button>
-          ) : (
-            <button
-              className={classes.exhibitionButton}
-              onClick={addItemToExhibition}
-            >
-              Add to Exhibition
-            </button>
-          )}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              paddingBottom: "20px",
+            }}
+          >
+            {isInExhibition ? (
+              <button
+                className={classes.exhibitionButton}
+                onClick={removeItemFromExhibition}
+              >
+                Remove from Exhibition
+              </button>
+            ) : (
+              <button
+                className={classes.exhibitionButton}
+                onClick={addItemToExhibition}
+                style={{ color: "white", borderColor: "white" }}
+              >
+                Add to Exhibition
+              </button>
+            )}
+          </div>
         </div>
         <TriangleButton onClick={close} text="Close" />
       </div>

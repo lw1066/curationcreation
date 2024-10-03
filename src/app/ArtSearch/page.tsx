@@ -168,11 +168,11 @@ const SearchPage: React.FC = () => {
 
   const animatedRecordCount = useCountAnimation(
     results.info.record_count || 0,
-    2000
+    3000
   );
   const animatedImageCount = useCountAnimation(
     results.info.image_count || 0,
-    2000
+    3000
   );
 
   const handleImageLoad = (id: string) => {
@@ -225,32 +225,38 @@ const SearchPage: React.FC = () => {
             style={{ width: "65%", marginBottom: "20px" }}
           />
 
-          <LoadMoreButton onClick={() => {}} text="Search" fontSize="12px" />
-        </form>
-        <div className={classes.filtersContainer}>
-          <p>
-            <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
-              {animatedRecordCount}
-            </span>{" "}
-            items found {"   "} with{" "}
-            <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
-              {animatedImageCount}
-            </span>{" "}
-            images
-          </p>
-          <p style={{ fontWeight: "600", margin: "20px" }}>
-            Filter your results
-          </p>
-          <input
-            type="checkbox"
-            id="onlyWithImages"
-            checked={onlyWithImages}
-            onChange={(e) => setOnlyWithImages(e.target.checked)} // Update checkbox state
+          <LoadMoreButton
+            onClick={() => {}}
+            text="Search"
+            fontSize="14px"
+            width="55px"
+            height="55px"
           />
-          <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
-            Only show items with images
-          </label>
-        </div>
+        </form>
+        {results.info.record_count > 0 && (
+          <div className={classes.filtersContainer}>
+            <p>
+              <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                {animatedRecordCount}
+              </span>{" "}
+              items found {"   "} with{" "}
+              <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                {animatedImageCount}
+              </span>{" "}
+              images
+            </p>
+
+            <input
+              type="checkbox"
+              id="onlyWithImages"
+              checked={onlyWithImages}
+              onChange={(e) => setOnlyWithImages(e.target.checked)}
+            />
+            <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
+              Only show items with images
+            </label>
+          </div>
+        )}
       </div>
 
       {loading && (
@@ -285,7 +291,7 @@ const SearchPage: React.FC = () => {
                         : `${item.baseImageUrl}/full/full/0/default.jpg`
                     }
                     fill
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw" // Responsive sizes for better performance
+                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     quality={100}
                     style={{ objectFit: "contain" }}
                     alt={item.title}
