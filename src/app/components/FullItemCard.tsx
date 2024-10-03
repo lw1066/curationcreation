@@ -136,7 +136,7 @@ const VaItemDisplay = ({
 
   const addItemToExhibition = () => {
     const existingItems = localStorage.getItem("exhibitionItems");
-    let exhibitionItems: Item[] = existingItems
+    const exhibitionItems: Item[] = existingItems
       ? JSON.parse(existingItems)
       : [];
 
@@ -169,7 +169,7 @@ const VaItemDisplay = ({
 
   useEffect(() => {
     const existingItems = localStorage.getItem("exhibitionItems");
-    let exhibitionItems: Item[] = existingItems
+    const exhibitionItems: Item[] = existingItems
       ? JSON.parse(existingItems)
       : [];
 
