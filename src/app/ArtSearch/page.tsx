@@ -222,7 +222,7 @@ const SearchPage: React.FC = () => {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter artist, place, type"
             required
-            style={{ width: "65%" }}
+            style={{ width: "65%", marginBottom: "20px" }}
           />
 
           <LoadMoreButton onClick={() => {}} text="Search" fontSize="12px" />

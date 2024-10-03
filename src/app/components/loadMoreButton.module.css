@@ -1,24 +1,29 @@
 .loadMoreButton {
-  background-color: #4caf50; /* Green background */
-  color: white; /* White text color */
-  border: none; /* Remove default border */
-  border-radius: 50%; /* Make the button round */
-  width: 50px; /* Set width */
-  height: 50px; /* Set height */
-  display: flex; /* Flexbox for centering text */
-  align-items: center; /* Center text vertically */
-  justify-content: center; /* Center text horizontally */
-  cursor: pointer; /* Pointer cursor on hover */
-  font-size: 0.875rem; /* Font size for the text */
-  transition: background-color 0.3s ease; /* Smooth background color transition */
+  background-color: transparent;
+  color: #158019;
+  border: 2px solid #158019;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+
+  transition: background-color 0.3s ease;
 }
 
 .loadMoreButton:hover {
-  background-color: #106814; /* Darker green on hover */
+  background-color: #10681446;
+}
+
+.loadMoreButton:disabled {
+  color: transparent;
+  cursor: not-allowed;
 }
 
 .buttonContainer {
   display: flex;
   justify-content: center;
-  margin: 20px 0; /* Add some space above the button */
+  margin: 0;
 }

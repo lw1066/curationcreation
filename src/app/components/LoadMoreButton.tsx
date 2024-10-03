@@ -12,7 +12,7 @@ const LoadMoreButton: React.FC<LoadMoreButtonProps> = ({
   onClick,
   disabled,
   text = "More",
-  fontSize = "16px",
+  fontSize = "12px",
 }) => {
   return (
     <div className={styles.buttonContainer}>

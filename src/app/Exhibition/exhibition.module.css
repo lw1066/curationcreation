@@ -1,0 +1,38 @@
+/* exhibition.module.css */
+
+.exhibitionPage {
+  padding: 20px;
+}
+
+.greeting {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.exhibitionGrid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(
+    1,
+    1fr
+  ); /* Default to 1 column on small screens */
+}
+
+@media (min-width: 600px) {
+  .exhibitionGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns for medium screens */
+  }
+}
+
+@media (min-width: 1200px) {
+  .exhibitionGrid {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns for large screens */
+  }
+}
+
+.exhibitionContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}

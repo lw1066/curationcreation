@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
       <div className={styles.navLinks}>
         <Link href="/">Home</Link>
         <Link href="/ArtSearch">Art Search</Link>
-        <Link href="/contact">Exhibition</Link>
+        <Link href="/Exhibition">Exhibition</Link>
       </div>
     </nav>
   );

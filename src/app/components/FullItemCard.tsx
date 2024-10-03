@@ -1,8 +1,9 @@
-import { useState, MouseEvent } from "react";
+import { useState, MouseEvent, useEffect } from "react";
 import Image from "next/image";
 import DOMPurify from "dompurify";
 import classes from "./fullItemCard.module.css";
 import TriangleButton from "./TriangleButton";
+import LoadMoreButton from "./LoadMoreButton";
 
 // Define types for item data structures
 interface Maker {
@@ -95,6 +96,7 @@ const VaItemDisplay = ({
 }: VaItemDisplayProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isInExhibition, setIsInExhibition] = useState<boolean>(false);
 
   // Prepare item data based on the current image index
   const {
@@ -132,6 +134,52 @@ const VaItemDisplay = ({
     setLoading(false);
   };
 
+  const addItemToExhibition = () => {
+    const existingItems = localStorage.getItem("exhibitionItems");
+    let exhibitionItems: Item[] = existingItems
+      ? JSON.parse(existingItems)
+      : [];
+
+    const isItemAlreadyAdded = exhibitionItems.some(
+      (exhibitItem) => exhibitItem.id === item.id
+    );
+
+    if (!isItemAlreadyAdded) {
+      exhibitionItems.push(item);
+      localStorage.setItem("exhibitionItems", JSON.stringify(exhibitionItems));
+      setIsInExhibition(true);
+      alert("Item added to exhibition!");
+    }
+  };
+
+  const removeItemFromExhibition = () => {
+    const existingItems = localStorage.getItem("exhibitionItems");
+    let exhibitionItems: Item[] = existingItems
+      ? JSON.parse(existingItems)
+      : [];
+
+    exhibitionItems = exhibitionItems.filter(
+      (exhibitItem) => exhibitItem.id !== item.id
+    );
+
+    localStorage.setItem("exhibitionItems", JSON.stringify(exhibitionItems));
+    setIsInExhibition(false);
+    alert("Item removed from exhibition.");
+  };
+
+  useEffect(() => {
+    const existingItems = localStorage.getItem("exhibitionItems");
+    let exhibitionItems: Item[] = existingItems
+      ? JSON.parse(existingItems)
+      : [];
+
+    const isItemInExhibition = exhibitionItems.some(
+      (exhibitItem) => exhibitItem.id === item.id
+    );
+
+    setIsInExhibition(isItemInExhibition);
+  }, [item]);
+
   return (
     <div className={classes.overlay} onClick={close}>
       <div className={classes.centeredContainer} onClick={handleClickInside}>
@@ -154,21 +202,18 @@ const VaItemDisplay = ({
 
         {metaImagesCount > 1 && (
           <div className={classes.imageControls}>
-            <button
-              className={classes.navButton}
+            <LoadMoreButton
               onClick={handlePreviousImage}
               disabled={currentImageIndex === 0 || loading}
-            >
-              Back
-            </button>
-            <p style={{ fontSize: ".5rem", lineHeight: "30px" }}>More images</p>
-            <button
-              className={classes.navButton}
+              text="Back"
+            />
+
+            <p style={{ fontSize: ".5rem", lineHeight: "50px" }}>More images</p>
+            <LoadMoreButton
               onClick={handleNextImage}
               disabled={currentImageIndex === metaImagesCount - 1 || loading}
-            >
-              Next
-            </button>
+              text="Next"
+            />
           </div>
         )}
 
@@ -240,6 +285,21 @@ const VaItemDisplay = ({
               <span>Not listed</span>
             )}
           </div>
+          {isInExhibition ? (
+            <button
+              className={classes.exhibitionButton}
+              onClick={removeItemFromExhibition}
+            >
+              Remove from Exhibition
+            </button>
+          ) : (
+            <button
+              className={classes.exhibitionButton}
+              onClick={addItemToExhibition}
+            >
+              Add to Exhibition
+            </button>
+          )}
         </div>
         <TriangleButton onClick={close} text="Close" />
       </div>
