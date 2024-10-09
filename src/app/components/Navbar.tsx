@@ -17,7 +17,14 @@ const Navbar: React.FC = () => {
             priority
           />
         </div>
-        <h1 className={styles.logoText}>Curation Creation</h1>
+
+        <div className={styles.logoText}>
+          <h1 className={styles.largeC}>C</h1>
+          <div className={styles.textStack}>
+            <div className={styles.first}>uration</div>
+            <div className={styles.second}>reation</div>
+          </div>
+        </div>
       </div>
       <div className={styles.navLinks}>
         <Link href="/">Home</Link>

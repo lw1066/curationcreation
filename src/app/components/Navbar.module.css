@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0.5rem 2rem;
   background-color: #030303;
 }
 
@@ -19,7 +19,79 @@
 }
 
 .logoText {
-  font-size: 3rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.largeC {
+  font-size: 130px;
+  /* line-height: 1; */
+  color: rgb(255, 255, 255);
+  animation: changeColorC 8s forwards;
+}
+
+.textStack {
+  display: flex;
+  flex-direction: column;
+  margin-left: 5px;
+  font-size: 50px;
+}
+
+.first {
+  opacity: 0;
+  animation: fadeIn 2s 0.5s forwards, greenToWhite 2.5s 5.5s forwards;
+  color: green;
+  line-height: 45px;
+}
+
+.second {
+  opacity: 0;
+  animation: fadeIn 2s 3s forwards, blueToWhite 2.5s 5.5s forwards;
+  color: blue;
+  line-height: 45px;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes changeColorC {
+  0% {
+    color: rgb(255, 255, 255);
+  }
+  33.3% {
+    color: green;
+  }
+  66.6% {
+    color: blue;
+  }
+  100% {
+    color: rgb(255, 255, 255);
+  }
+}
+
+@keyframes greenToWhite {
+  0% {
+    color: green;
+  }
+  100% {
+    color: white;
+  }
+}
+
+@keyframes blueToWhite {
+  0% {
+    color: blue;
+  }
+  100% {
+    color: white;
+  }
 }
 
 .navLinks {
@@ -38,23 +110,40 @@
   color: #0070f3;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 802px) {
   .navbar {
     flex-direction: column;
     align-items: flex-start;
+    padding: 0 1rem 0.5rem 1rem;
   }
 
   .navLinks {
     gap: 1rem;
-    margin-top: 0.5rem;
+
     width: 100%;
     justify-content: flex-end;
   }
 }
 
-@media (max-width: 724px) {
+@media (max-width: 418px) {
   .navbar {
-    padding: 0.5rem 0.5rem;
+  }
+
+  .textStack {
+    font-size: 35px;
+  }
+
+  .largeC {
+    font-size: 100px;
+  }
+
+  .logo {
+    width: 80px;
+  }
+
+  .first,
+  .second {
+    line-height: 30px;
   }
   .logoText {
     font-size: 40px;
