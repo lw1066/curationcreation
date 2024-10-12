@@ -17,6 +17,7 @@ interface Material {
 
 interface Technique {
   text: string;
+  id: string;
 }
 
 interface Origin {
@@ -63,7 +64,7 @@ const sanitizeHTML = (htmlString: string): string => {
 const prepareItemData = (item: Item, currentImageIndex: number) => {
   const imageUrl = item.images?._iiif_image
     ? `${item.images._iiif_image}/full/full/0/default.jpg`
-    : "/images/no_image.png";
+    : "/images/no_image.png"; // Use fallback if no image exists
 
   const metaImages = item.images?.imagesMeta;
   const currentImageUrl =
@@ -83,9 +84,7 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
     materials: item?.materials?.map((material) => material.text) || [],
     techniques: item?.techniques?.map((technique) => technique.text) || [],
     origins: item?.origins?.map((origin) => origin.place.text) || [],
-    metaImagesCount: item.images?.imagesMeta?.length
-      ? item.images?.imagesMeta?.length
-      : 0, // Get number of images
+    metaImagesCount: metaImages ? metaImages.length : 0, // Get number of images
   };
 };
 
@@ -223,19 +222,28 @@ const VaItemDisplay = ({
           />
 
           <p>
-            <strong>Maker:</strong>{" "}
-            {makerId ? (
-              <span
-                onClick={() => {
-                  handleMakerSearch(makerId);
-                  close();
-                }}
-                className={classes.clickableMaker}
-              >
-                {makerName}
-              </span>
+            <strong>Makers:</strong>{" "}
+            {item.maker && item.maker.length > 0 ? (
+              item.maker.map((maker, index) => (
+                <span key={index}>
+                  {maker.id ? (
+                    <span
+                      onClick={() => {
+                        handleMakerSearch(maker.id!);
+                        close();
+                      }}
+                      className={classes.clickableMaker} // Class applied if maker has an id
+                    >
+                      {maker.name}
+                    </span>
+                  ) : (
+                    maker.name
+                  )}
+                  {index < item.maker.length - 1 ? ", " : ""}{" "}
+                </span>
+              ))
             ) : (
-              makerName
+              <span>Not available</span>
             )}
           </p>
           <p>

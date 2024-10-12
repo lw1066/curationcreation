@@ -20,7 +20,7 @@ interface ImageMeta {
 }
 
 interface ImageResponse {
-  iiifImageUrl: string | null;
+  _iiif_imageUrl: string | null;
   imagesMeta: ImageMeta[] | null;
 }
 
@@ -45,7 +45,7 @@ interface VAResponse {
     briefDescription?: string;
   };
   meta: {
-    images: { _iiif_image: string; _images_meta: ImageMeta[] }; // Updated to match the response structure
+    images: { _iiif_image: string; _images_meta: ImageMeta[] };
   };
 }
 
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
       : [{ name: "No maker", id: "No ID" }];
 
     const images: ImageResponse = {
-      iiifImageUrl: metaRecord.images?._iiif_image || null,
+      _iiif_imageUrl: metaRecord.images?._iiif_image || null,
       imagesMeta: metaRecord.images?._images_meta || null,
     };
 

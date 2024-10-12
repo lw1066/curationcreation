@@ -93,8 +93,9 @@ export async function POST(req: Request) {
         title: record._primaryTitle || "Untitled",
         thumbnailUrl:
           record._images?._primary_thumbnail || "/images/no_image.png",
-        baseImageUrl:
-          record._images?._iiif_image_base_url || "/images/no_image.png",
+        baseImageUrl: record._images?._iiif_image_base_url
+          ? `${record._images._iiif_image_base_url}/full/full/0/default.jpg`
+          : "/images/no_image.png",
         imageId: record._primaryImageId || null,
         date: record._primaryDate || null,
       })

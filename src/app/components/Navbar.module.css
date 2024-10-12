@@ -126,9 +126,6 @@
 }
 
 @media (max-width: 418px) {
-  .navbar {
-  }
-
   .textStack {
     font-size: 35px;
   }

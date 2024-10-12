@@ -4,9 +4,15 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "framemark.vam.ac.uk", // Example hostname
-        port: "", // Leave empty if not required
-        pathname: "/**", // Matches all paths
+        hostname: "framemark.vam.ac.uk",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.europeana.eu",
+        port: "",
+        pathname: "/**",
       },
     ],
   },
