@@ -223,7 +223,7 @@ const VaItemDisplay = ({
 
           <p>
             <strong>Makers:</strong>{" "}
-            {item.maker && item.maker.length > 0 ? (
+            {item.maker?.length ? (
               item.maker.map((maker, index) => (
                 <span key={index}>
                   {maker.id ? (
@@ -239,7 +239,7 @@ const VaItemDisplay = ({
                   ) : (
                     maker.name
                   )}
-                  {index < item.maker.length - 1 ? ", " : ""}{" "}
+                  {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
                 </span>
               ))
             ) : (
