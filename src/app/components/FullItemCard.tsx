@@ -75,8 +75,8 @@ const prepareItemData = (item: Item, currentImageIndex: number) => {
   return {
     imageUrl: currentImageUrl,
     title: [sanitizeHTML(item?.title || "Untitled")],
-    makerName: item?.maker?.[0]?.name || "Not available",
-    makerId: item?.maker?.[0]?.id || "",
+    // makerName: item?.maker?.[0]?.name || "Not available",
+    // makerId: item?.maker?.[0]?.id || "",
     description: sanitizeHTML(item?.description || "No description available"),
     physicalDescription: sanitizeHTML(
       item?.physicalDescription || "No physical description available"
@@ -101,8 +101,8 @@ const VaItemDisplay = ({
   const {
     imageUrl,
     title,
-    makerName,
-    makerId,
+    // makerName,
+    // makerId,
     description,
     physicalDescription,
     materials,

@@ -53,7 +53,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
     console.log("Received query:", query, cursor);
 
     const pageSize = 10;
-    let filteredItems: EuropeanaItem[] = [];
+    const filteredItems: EuropeanaItem[] = [];
     let nextCursor: string | null = cursor || "*";
     const EItemsInfo = {
       record_count: 0,

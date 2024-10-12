@@ -68,7 +68,7 @@ interface Results {
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState<string>("");
-  const [makerId, setMakerId] = useState<string | null>(null);
+  // const [makerId, setMakerId] = useState<string | null>(null);
   const [results, setResults] = useState<Results>({
     va: [],
     europeana: [],
@@ -178,7 +178,7 @@ const SearchPage: React.FC = () => {
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     }); // Clear previous results
-    setMakerId(null);
+    // setMakerId(null);
 
     if (searchSource === "va") {
       await fetchSearchResults({
@@ -224,7 +224,7 @@ const SearchPage: React.FC = () => {
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     });
-    setMakerId(makerId);
+    // setMakerId(makerId);
 
     await fetchSearchResults({
       searchQuery: null,
