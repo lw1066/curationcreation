@@ -1,27 +1,16 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
+import { ImageMeta, fullVaItem } from "../../types";
 
-// Interface for artist maker person
 interface ArtistMakerPerson {
   name: { text: string; id?: string };
   association: { text: string; id?: string };
   note: string;
 }
 
-// Interface for Maker
-interface Maker {
-  name: string;
-  id?: string;
-}
-
-// Define types for the image structure
-interface ImageMeta {
-  assetRef: string; // Reference to the image asset
-}
-
 interface ImageResponse {
-  _iiif_imageUrl: string | null;
-  imagesMeta: ImageMeta[] | null;
+  _iiif_image: string;
+  imagesMeta: ImageMeta[];
 }
 
 // Define types for the response data
@@ -53,27 +42,6 @@ interface RequestBody {
   id: string;
 }
 
-interface VAFullItem {
-  id: string;
-  maker: Maker[];
-  title: string;
-  description: string;
-  physicalDescription?: string;
-  materials?: { text: string; id: string }[];
-  techniques?: { text: string; id: string }[];
-  origins?: {
-    place: { text: string; id?: string };
-    association: { text: string };
-  }[];
-  productionDates?: {
-    date: { text: string };
-    association: { text: string };
-  }[];
-  images: ImageResponse; // Updated to use the new ImageResponse type
-  briefDescription?: string;
-}
-
-// Handle POST request
 export async function POST(req: Request) {
   const { id }: RequestBody = await req.json();
 
@@ -93,21 +61,23 @@ export async function POST(req: Request) {
       : [{ name: "No maker", id: "No ID" }];
 
     const images: ImageResponse = {
-      _iiif_imageUrl: metaRecord.images?._iiif_image || null,
-      imagesMeta: metaRecord.images?._images_meta || null,
+      _iiif_image: metaRecord.images?._iiif_image || "/images/no_image.png",
+      imagesMeta: metaRecord.images?._images_meta || [],
     };
 
-    const vaFullItem: VAFullItem = {
+    const vaFullItem: fullVaItem = {
       id: record.systemNumber,
+      searchSource: "va",
       maker: makers,
       title: record.titles?.[0]?.title || "Untitled",
       description: record.summaryDescription || "No description",
       physicalDescription: record.physicalDescription || "No description",
       materials: record.materials || [{ text: "none", id: "none" }],
       techniques: record.techniques || [],
-      origins: record.placesOfOrigin || [],
+      placesOfOrigin: record.placesOfOrigin || [],
       productionDates: record.productionDates || [],
-      images: images, // Updated to use the structured images array
+      images: images,
+      baseImageUrl: metaRecord.images?._iiif_image || "/images/no_image.png",
       briefDescription: record.briefDescription || "No description",
     };
 

@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 
 interface EuropeanaItem {
   id: string;
-  title: string[];
+  searchSource: string;
+  title: string;
   dcDescriptionLangAware?: {
     en?: string[];
   };
@@ -105,6 +106,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
 
     const items = filteredItems.map((item) => ({
       id: item.id,
+      searchSource: "euro",
       title: item.title[0] || "No title",
       description:
         item.dcDescriptionLangAware && item.dcDescriptionLangAware.en

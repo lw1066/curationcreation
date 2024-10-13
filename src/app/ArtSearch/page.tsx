@@ -3,68 +3,10 @@ import { useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import classes from "./artSearch.module.css";
-import VaItemDisplay from "../components/FullItemCard";
+import FullItemCard from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
 import useCountAnimation from "../components/useCountAnimation";
-
-interface Maker {
-  name: string;
-  id?: string;
-}
-
-interface ArtItem {
-  id: string;
-  title: string;
-  maker: Maker;
-  date: string;
-  baseImageUrl: string;
-  imageUrl?: string; // Optional for Europeana items
-}
-
-interface Material {
-  text: string;
-  id: string;
-}
-
-interface ImageMeta {
-  assetRef: string; // Reference to the image asset
-}
-
-interface Technique {
-  text: string;
-  id: string;
-}
-
-interface fullVaItem {
-  id: string;
-  title: string;
-  maker: Maker[];
-  date: string;
-  baseImageUrl: string;
-  description: string;
-  physicalDescription: string;
-  materials: Material[];
-  techniques: Technique[];
-  placesOfOrigin?: {
-    place: { text: string; id?: string };
-    association: { text: string };
-  }[];
-  productionDates?: {
-    date: { text: string };
-    association: { text: string };
-  }[];
-  images?: {
-    _iiif_image: string;
-    imagesMeta?: ImageMeta[];
-  };
-  briefDescription: string;
-}
-
-interface Results {
-  va: ArtItem[];
-  europeana: ArtItem[]; // Add Europeana results
-  info: { record_count: number; image_count: number };
-}
+import { fullVaItem, Results, ArtItem } from "../types";
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState<string>("");
@@ -138,28 +80,27 @@ const SearchPage: React.FC = () => {
     try {
       const response = await axios.post("/api/europeana-search", {
         query: searchQuery,
-        cursor: cursor || "*", // Default cursor value if null
+        cursor: cursor || "*",
         rows: 10,
       });
 
       const fetchedResults = response.data.data;
-      console.log(response.data.nextCursor);
 
       setResults((prevResults) => ({
         ...prevResults,
         europeana:
           europeanaCursor === null
-            ? fetchedResults.europeana // On first page, replace
-            : [...prevResults.europeana, ...fetchedResults.europeana], // On subsequent pages, append
+            ? fetchedResults.europeana
+            : [...prevResults.europeana, ...fetchedResults.europeana],
         info: fetchedResults.info,
       }));
 
       if (response.data.nextCursor) {
-        setEuropeanaCursor(response.data.nextCursor); // Update cursor for next pagination
+        setEuropeanaCursor(response.data.nextCursor);
         setHasMore(true);
       } else {
-        setEuropeanaCursor(null); // No more results
-        setHasMore(false); // Disable load more button
+        setEuropeanaCursor(null);
+        setHasMore(false);
       }
     } catch (err) {
       setError(`An error occurred: ${err}`);
@@ -168,17 +109,15 @@ const SearchPage: React.FC = () => {
     }
   };
 
-  // Handle form submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setVaPage(1); // Reset to first page for VA
-    setEuropeanaCursor(null); // Reset cursor for Europeana
+    setVaPage(1);
+    setEuropeanaCursor(null);
     setResults({
       va: [],
       europeana: [],
       info: { record_count: 0, image_count: 0 },
-    }); // Clear previous results
-    // setMakerId(null);
+    });
 
     if (searchSource === "va") {
       await fetchSearchResults({
@@ -197,26 +136,49 @@ const SearchPage: React.FC = () => {
         }),
         fetchEuropeanaResults(query, null),
       ]);
-    }
-  };
-
-  // Handle full info request for a specific item
-  const handleFullInfoRequest = async (id: string) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.post("/api/va-full-info", { id });
-
-      setFullItem(response.data.data.vaFullItem);
-    } catch (err) {
-      setError(`An error occurred: ${err}`);
-    } finally {
       setLoading(false);
     }
   };
 
-  // Handle maker search by maker_id
+  const handleFullInfoRequest = async (item: ArtItem) => {
+    setLoading(true);
+    setError(null);
+
+    if (item.searchSource === "va") {
+      const id = item.id;
+      try {
+        const response = await axios.post("/api/va-full-info", { id });
+
+        setFullItem(response.data.data.vaFullItem);
+      } catch (err) {
+        setError(`An error occurred: ${err}`);
+      } finally {
+        setLoading(false);
+      }
+    } else if (item.searchSource === "euro") {
+      const fullEuroItem = {
+        id: item.id,
+        searchSource: "euro",
+        title: item.title,
+        maker: [{ name: "Europeana does not provide maker" }],
+        date: item.year || "unknown",
+        baseImageUrl: item.fullImage || "/No_Image_Available.jpg",
+        description: `Item provided by ${item.dataProvider}. ${item.description}`,
+        physicalDescription: "Not provided",
+        materials: [],
+        techniques: [],
+        placesOfOrigin: [],
+        productionDates: [],
+        images: {
+          _iiif_image: item.fullImage || "/images/no_image.png",
+        },
+        briefDescription: "Not provided by Europenana",
+      };
+      setFullItem(fullEuroItem);
+      setLoading(false);
+    }
+  };
+
   const handleMakerSearch = async (makerId: string) => {
     setVaPage(1);
     setResults({
@@ -224,7 +186,6 @@ const SearchPage: React.FC = () => {
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     });
-    // setMakerId(makerId);
 
     await fetchSearchResults({
       searchQuery: null,
@@ -233,17 +194,15 @@ const SearchPage: React.FC = () => {
     });
   };
 
-  // Close full item display modal
   const closeFullItemDisplay = () => {
     setFullItem(null);
   };
 
-  // Handle loading more results (pagination)
   const loadMoreResults = async () => {
     if (!hasMore || loading) return;
 
     const nextPage = vaPage + 1;
-    setVaPage(nextPage); // Increment page number
+    setVaPage(nextPage);
 
     if (searchSource === "va") {
       await fetchSearchResults({
@@ -293,7 +252,7 @@ const SearchPage: React.FC = () => {
   return (
     <div>
       {fullItem && (
-        <VaItemDisplay
+        <FullItemCard
           item={fullItem}
           close={closeFullItemDisplay}
           handleMakerSearch={handleMakerSearch}
@@ -431,7 +390,7 @@ const SearchPage: React.FC = () => {
                     style={{ objectFit: "contain" }}
                     alt={item.title}
                     onLoad={() => handleImageLoad(item.id)}
-                    onClick={() => handleFullInfoRequest(item.id)}
+                    onClick={() => handleFullInfoRequest(item)}
                   />
                 </div>
                 <p className={classes.title}>{item.title}</p>

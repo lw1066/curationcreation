@@ -11,6 +11,7 @@ interface ArtSearchRequest {
 // Define types for the response structure
 interface VAMItem {
   id: string;
+  searchSource: string;
   maker: string;
   title: string;
   thumbnailUrl: string;
@@ -53,7 +54,6 @@ interface VAMApiRecord {
   _primaryImageId?: string;
 }
 
-// Handle POST request
 export async function POST(req: Request) {
   try {
     const { query, makerId, start = 1 }: ArtSearchRequest = await req.json();
@@ -89,6 +89,7 @@ export async function POST(req: Request) {
     const vaItems: VAMItem[] = vaResponse.data.records.map(
       (record: VAMApiRecord) => ({
         id: record.systemNumber,
+        searchSource: "va",
         maker: record._primaryMaker?.name || "Unknown",
         title: record._primaryTitle || "Untitled",
         thumbnailUrl:

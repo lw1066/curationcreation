@@ -1,98 +1,23 @@
 import { useState, MouseEvent, useEffect } from "react";
 import Image from "next/image";
-import DOMPurify from "dompurify";
 import classes from "./fullItemCard.module.css";
 import TriangleButton from "./TriangleButton";
 import LoadMoreButton from "./LoadMoreButton";
-
-// Define types for item data structures
-interface Maker {
-  name: string;
-  id?: string;
-}
-
-interface Material {
-  text: string;
-}
-
-interface Technique {
-  text: string;
-  id: string;
-}
-
-interface Origin {
-  place: {
-    text: string;
-  };
-}
-
-interface ImageMeta {
-  assetRef: string;
-}
-
-interface Item {
-  id: string;
-  maker?: Maker[];
-  title?: string;
-  description?: string;
-  physicalDescription?: string;
-  materials?: Material[];
-  techniques?: Technique[];
-  origins?: Origin[];
-  images?: {
-    _iiif_image: string;
-    imagesMeta?: ImageMeta[];
-  };
-  provider?: string;
-}
+import prepareItemData from "../utils/prepareItemData";
+import { Item } from "../types";
 
 // Define prop types for VaItemDisplay component
-interface VaItemDisplayProps {
+interface FullItemCardProps {
   item: Item;
   close: () => void;
   handleMakerSearch: (makerId: string) => void;
 }
 
-// Function to sanitize HTML content
-const sanitizeHTML = (htmlString: string): string => {
-  return DOMPurify.sanitize(htmlString, {
-    ALLOWED_TAGS: ["i", "em", "b", "strong", "br", "p"],
-  });
-};
-
-// Function to prepare and clean the item data
-const prepareItemData = (item: Item, currentImageIndex: number) => {
-  const imageUrl = item.images?._iiif_image
-    ? `${item.images._iiif_image}/full/full/0/default.jpg`
-    : "/images/no_image.png"; // Use fallback if no image exists
-
-  const metaImages = item.images?.imagesMeta;
-  const currentImageUrl =
-    metaImages && metaImages[currentImageIndex]
-      ? `https://framemark.vam.ac.uk/collections/${metaImages[currentImageIndex].assetRef}/full/full/0/default.jpg`
-      : imageUrl;
-
-  return {
-    imageUrl: currentImageUrl,
-    title: [sanitizeHTML(item?.title || "Untitled")],
-    // makerName: item?.maker?.[0]?.name || "Not available",
-    // makerId: item?.maker?.[0]?.id || "",
-    description: sanitizeHTML(item?.description || "No description available"),
-    physicalDescription: sanitizeHTML(
-      item?.physicalDescription || "No physical description available"
-    ),
-    materials: item?.materials?.map((material) => material.text) || [],
-    techniques: item?.techniques?.map((technique) => technique.text) || [],
-    origins: item?.origins?.map((origin) => origin.place.text) || [],
-    metaImagesCount: metaImages ? metaImages.length : 0, // Get number of images
-  };
-};
-
-const VaItemDisplay = ({
+const FullItemCard = ({
   item,
   close,
   handleMakerSearch,
-}: VaItemDisplayProps) => {
+}: FullItemCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isInExhibition, setIsInExhibition] = useState<boolean>(false);
@@ -101,8 +26,7 @@ const VaItemDisplay = ({
   const {
     imageUrl,
     title,
-    // makerName,
-    // makerId,
+    searchSource,
     description,
     physicalDescription,
     materials,
@@ -324,4 +248,4 @@ const VaItemDisplay = ({
   );
 };
 
-export default VaItemDisplay;
+export default FullItemCard;

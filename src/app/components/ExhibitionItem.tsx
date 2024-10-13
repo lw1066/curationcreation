@@ -2,76 +2,13 @@ import { useState } from "react";
 import Image from "next/image";
 import classes from "./exhibitionItem.module.css";
 import LoadMoreButton from "./LoadMoreButton";
-
-interface Maker {
-  name: string;
-  id?: string;
-}
-
-interface Material {
-  text: string;
-}
-
-interface Technique {
-  text: string;
-}
-
-interface Origin {
-  place: {
-    text: string;
-  };
-}
-
-interface ImageMeta {
-  assetRef: string;
-}
-
-interface Item {
-  id: string;
-  maker?: Maker[];
-  title?: string;
-  description?: string;
-  physicalDescription?: string;
-  materials?: Material[];
-  techniques?: Technique[];
-  origins?: Origin[];
-  images?: {
-    _iiif_image: string;
-    imagesMeta?: ImageMeta[];
-  };
-  provider?: string;
-}
+import prepareItemData from "../utils/prepareItemData";
+import { Item } from "../types";
 
 interface ExhibitionItemProps {
   item: Item;
   onRemove: (id: string) => void;
 }
-
-const prepareItemData = (item: Item, currentImageIndex: number) => {
-  const imageUrl = item.images?._iiif_image
-    ? `${item.images._iiif_image}/full/full/0/default.jpg`
-    : "/images/no_image.png";
-
-  const metaImages = item.images?.imagesMeta;
-  const currentImageUrl =
-    metaImages && metaImages[currentImageIndex]
-      ? `https://framemark.vam.ac.uk/collections/${metaImages[currentImageIndex].assetRef}/full/full/0/default.jpg`
-      : imageUrl;
-
-  return {
-    imageUrl: currentImageUrl,
-    title: item?.title || "Untitled",
-    makerName: item?.maker?.[0]?.name || "Not available",
-    makerId: item?.maker?.[0]?.id || "",
-    description: item?.description || "No description available",
-    physicalDescription:
-      item?.physicalDescription || "No physical description available",
-    materials: item?.materials?.map((material) => material.text) || [],
-    techniques: item?.techniques?.map((technique) => technique.text) || [],
-    origins: item?.origins?.map((origin) => origin.place.text) || [],
-    metaImagesCount: item.images?.imagesMeta?.length || 0, // Number of images
-  };
-};
 
 const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -80,6 +17,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
 
   const {
     imageUrl,
+    searchSource,
     title,
     makerName,
     description,
@@ -119,7 +57,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
 
         <Image
           src={imageUrl}
-          alt={title}
+          alt={title.join("")}
           fill={true}
           style={{ objectFit: "contain" }}
           quality={100}
@@ -152,24 +90,37 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
         className={`${classes.infoContainer} ${showInfo ? classes.active : ""}`}
       >
         <div className={classes.itemInfo}>
-          <h2 className={classes.title}>{title}</h2>
+          <h2
+            className={classes.title}
+            dangerouslySetInnerHTML={{ __html: title[0] }}
+          />
+          {searchSource === "va" && (
+            <p>
+              <strong>Maker:</strong> {makerName}
+            </p>
+          )}
           <p>
-            <strong>Maker:</strong> {makerName}
+            <strong>Description:</strong>{" "}
+            <span dangerouslySetInnerHTML={{ __html: description }} />
           </p>
-          <p>
-            <strong>Description:</strong> {description}
-          </p>
-          <p>
-            <strong>Physical Description:</strong> {physicalDescription}
-          </p>
-          <p>
-            <strong>Materials:</strong>{" "}
-            {materials.length > 0 ? materials.join(", ") : "Not listed"}
-          </p>
-          <p>
-            <strong>Techniques:</strong>{" "}
-            {techniques.length > 0 ? techniques.join(", ") : "Not listed"}
-          </p>
+          {searchSource === "va" && (
+            <>
+              <p>
+                <strong>Physical Description:</strong>{" "}
+                <span
+                  dangerouslySetInnerHTML={{ __html: physicalDescription }}
+                />
+              </p>
+              <p>
+                <strong>Materials:</strong>{" "}
+                {materials.length > 0 ? materials.join(", ") : "Not listed"}
+              </p>
+              <p>
+                <strong>Techniques:</strong>{" "}
+                {techniques.length > 0 ? techniques.join(", ") : "Not listed"}
+              </p>
+            </>
+          )}
           <p>
             <strong>Origins:</strong>{" "}
             {origins.length > 0 ? origins.join(", ") : "Not listed"}
