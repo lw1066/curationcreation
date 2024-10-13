@@ -145,65 +145,73 @@ const FullItemCard = ({
             dangerouslySetInnerHTML={{ __html: title[0] }}
           />
 
-          <p>
-            <strong>Makers:</strong>{" "}
-            {item.maker?.length ? (
-              item.maker.map((maker, index) => (
-                <span key={index}>
-                  {maker.id ? (
-                    <span
-                      onClick={() => {
-                        handleMakerSearch(maker.id!);
-                        close();
-                      }}
-                      className={classes.clickableMaker} // Class applied if maker has an id
-                    >
-                      {maker.name}
-                    </span>
-                  ) : (
-                    maker.name
-                  )}
-                  {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
-                </span>
-              ))
-            ) : (
-              <span>Not available</span>
-            )}
-          </p>
+          {searchSource === "va" && (
+            <p>
+              <strong>Makers:</strong>{" "}
+              {item.maker?.length ? (
+                item.maker.map((maker, index) => (
+                  <span key={index}>
+                    {maker.id ? (
+                      <span
+                        onClick={() => {
+                          handleMakerSearch(maker.id!);
+                          close();
+                        }}
+                        className={classes.clickableMaker} // Class applied if maker has an id
+                      >
+                        {maker.name}
+                      </span>
+                    ) : (
+                      maker.name
+                    )}
+                    {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
+                  </span>
+                ))
+              ) : (
+                <span>Not available</span>
+              )}
+            </p>
+          )}
           <p>
             <strong>Description:</strong>{" "}
             <span dangerouslySetInnerHTML={{ __html: description }} />
           </p>
-          <p>
-            <strong>Physical Description:</strong>{" "}
-            <span dangerouslySetInnerHTML={{ __html: physicalDescription }} />
-          </p>
-          <div>
-            <strong>Materials:</strong>{" "}
-            {materials.length > 0 ? (
-              materials.map((material, index) => (
-                <span key={index}>
-                  {material}
-                  {index < materials.length - 1 ? ", " : ""}
-                </span>
-              ))
-            ) : (
-              <span>Not listed</span>
-            )}
-          </div>
-          <div>
-            <strong>Techniques:</strong>{" "}
-            {techniques.length > 0 ? (
-              techniques.map((technique, index) => (
-                <span key={index}>
-                  {technique}
-                  {index < techniques.length - 1 ? ", " : ""}
-                </span>
-              ))
-            ) : (
-              <span>Not listed</span>
-            )}
-          </div>
+          {searchSource === "va" && (
+            <>
+              <p>
+                <strong>Physical Description:</strong>{" "}
+                <span
+                  dangerouslySetInnerHTML={{ __html: physicalDescription }}
+                />
+              </p>
+              <div>
+                <strong>Materials:</strong>{" "}
+                {materials.length > 0 ? (
+                  materials.map((material, index) => (
+                    <span key={index}>
+                      {material}
+                      {index < materials.length - 1 ? ", " : ""}
+                    </span>
+                  ))
+                ) : (
+                  <span>Not listed</span>
+                )}
+              </div>
+              <div>
+                <strong>Techniques:</strong>{" "}
+                {techniques.length > 0 ? (
+                  techniques.map((technique, index) => (
+                    <span key={index}>
+                      {technique}
+                      {index < techniques.length - 1 ? ", " : ""}
+                    </span>
+                  ))
+                ) : (
+                  <span>Not listed</span>
+                )}
+              </div>
+            </>
+          )}
           <div>
             <strong>Origins:</strong>{" "}
             {origins.length > 0 ? (
