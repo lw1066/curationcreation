@@ -38,7 +38,7 @@ interface ApiResponse {
       rights: string;
       timespan: string;
     }>;
-    info: {
+    EItemsInfo: {
       record_count: number;
       image_count: number;
     };
@@ -128,7 +128,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       message: "Art retrieved!",
       data: {
         europeana: items,
-        info: EItemsInfo,
+        EItemsInfo: EItemsInfo,
       },
 
       nextCursor: nextCursor,
@@ -141,7 +141,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       message: "Failed to fetch data from Europeana API",
       data: {
         europeana: [],
-        info: {
+        EItemsInfo: {
           record_count: 0,
           image_count: 0,
         },

@@ -29,8 +29,9 @@ const SearchPage: React.FC = () => {
   const [searchSource, setSearchSource] = useState<"va" | "europeana" | "both">(
     "va"
   );
+  const [makerId, setMakerId] = useState<string | null>(null);
 
-  const fetchSearchResults = async ({
+  const fetchVaSearchResults = async ({
     searchQuery,
     searchMakerId,
     pageNum,
@@ -52,18 +53,14 @@ const SearchPage: React.FC = () => {
 
       const fetchedResults = response.data.data;
 
-      // Update the results and pagination
-      setResults((prevResults) => ({
-        ...prevResults,
-        va:
-          pageNum === 1
-            ? fetchedResults.va
-            : [...prevResults.va, ...fetchedResults.va],
-        info: fetchedResults.info,
-      }));
-      setHasMore(fetchedResults.va.length === 15); // Check if more results are available
+      // Return the fetched results to be handled in handleSubmit
+      return {
+        va: fetchedResults.va,
+        vaItemsInfo: fetchedResults.vaItemsInfo,
+      };
     } catch (err) {
       setError(`An error occurred: ${err}`);
+      return { va: [], vaItemsInfo: { record_count: 0, image_count: 0 } };
     } finally {
       setLoading(false);
     }
@@ -86,24 +83,19 @@ const SearchPage: React.FC = () => {
 
       const fetchedResults = response.data.data;
 
-      setResults((prevResults) => ({
-        ...prevResults,
-        europeana:
-          europeanaCursor === null
-            ? fetchedResults.europeana
-            : [...prevResults.europeana, ...fetchedResults.europeana],
-        info: fetchedResults.info,
-      }));
-
-      if (response.data.nextCursor) {
-        setEuropeanaCursor(response.data.nextCursor);
-        setHasMore(true);
-      } else {
-        setEuropeanaCursor(null);
-        setHasMore(false);
-      }
+      // Return the fetched results to be handled in handleSubmit
+      return {
+        europeana: fetchedResults.europeana,
+        EItemsInfo: fetchedResults.EItemsInfo,
+        nextCursor: response.data.nextCursor ?? null,
+      };
     } catch (err) {
       setError(`An error occurred: ${err}`);
+      return {
+        europeana: [],
+        EItemsInfo: { record_count: 0, image_count: 0 },
+        nextCursor: null,
+      };
     } finally {
       setLoading(false);
     }
@@ -119,24 +111,76 @@ const SearchPage: React.FC = () => {
       info: { record_count: 0, image_count: 0 },
     });
 
+    setMakerId(null);
+
     if (searchSource === "va") {
-      await fetchSearchResults({
+      const vaResults = await fetchVaSearchResults({
         searchQuery: query,
         searchMakerId: null,
         pageNum: 1,
       });
-    } else if (searchSource === "europeana") {
-      await fetchEuropeanaResults(query, null);
-    } else if (searchSource === "both") {
-      await Promise.all([
-        fetchSearchResults({
+
+      const moreVaResults =
+        vaResults.vaItemsInfo?.record_count > vaResults.va.length;
+
+      setResults({
+        va: vaResults.va,
+        europeana: [],
+        info: {
+          record_count: vaResults.vaItemsInfo?.record_count || 0,
+          image_count: vaResults.vaItemsInfo?.image_count || 0,
+        },
+      });
+      setHasMore(moreVaResults);
+    }
+
+    // Handle Europeana-only search
+    else if (searchSource === "europeana") {
+      const europeanaResults = await fetchEuropeanaResults(query, null);
+
+      const moreEuropeanaResults = !!europeanaResults.nextCursor;
+      setEuropeanaCursor(europeanaResults.nextCursor);
+
+      setResults({
+        va: [],
+        europeana: europeanaResults.europeana,
+        info: {
+          record_count: europeanaResults.EItemsInfo?.record_count || 0,
+          image_count: europeanaResults.EItemsInfo?.image_count || 0,
+        },
+      });
+      setHasMore(moreEuropeanaResults);
+    }
+
+    // Handle Both VA and Europeana search
+    else if (searchSource === "both") {
+      const [vaResults, europeanaResults] = await Promise.all([
+        fetchVaSearchResults({
           searchQuery: query,
           searchMakerId: null,
           pageNum: 1,
         }),
         fetchEuropeanaResults(query, null),
       ]);
-      setLoading(false);
+
+      const moreVaResults =
+        vaResults.vaItemsInfo?.record_count > vaResults.va.length;
+      const moreEuropeanaResults = !!europeanaResults.nextCursor;
+      setEuropeanaCursor(europeanaResults.nextCursor);
+
+      setResults({
+        va: vaResults.va,
+        europeana: europeanaResults.europeana,
+        info: {
+          record_count:
+            (vaResults.vaItemsInfo?.record_count || 0) +
+            (europeanaResults.EItemsInfo?.record_count || 0),
+          image_count:
+            (vaResults.vaItemsInfo?.image_count || 0) +
+            (europeanaResults.EItemsInfo?.image_count || 0),
+        },
+      });
+      setHasMore(moreVaResults || moreEuropeanaResults);
     }
   };
 
@@ -181,17 +225,32 @@ const SearchPage: React.FC = () => {
 
   const handleMakerSearch = async (makerId: string) => {
     setVaPage(1);
+    setEuropeanaCursor(null);
     setResults({
       va: [],
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     });
+    setLoading(true);
+    setError(null);
+    setMakerId(makerId);
 
-    await fetchSearchResults({
+    const vaResults = await fetchVaSearchResults({
       searchQuery: null,
       searchMakerId: makerId,
       pageNum: 1,
     });
+
+    setResults({
+      va: vaResults.va,
+      europeana: [],
+      info: {
+        record_count: vaResults.vaItemsInfo?.record_count || 0,
+        image_count: vaResults.vaItemsInfo?.image_count || 0,
+      },
+    });
+
+    setLoading(false);
   };
 
   const closeFullItemDisplay = () => {
@@ -201,27 +260,62 @@ const SearchPage: React.FC = () => {
   const loadMoreResults = async () => {
     if (!hasMore || loading) return;
 
-    const nextPage = vaPage + 1;
-    setVaPage(nextPage);
+    setLoading(true);
+    setError(null);
 
-    if (searchSource === "va") {
-      await fetchSearchResults({
+    let newVaResults = {
+      va: [],
+      vaItemsInfo: { record_count: 0, image_count: 0 },
+    };
+    let newEuropeanaResults = {
+      europeana: [],
+      EItemsInfo: { record_count: 0, image_count: 0 },
+      nextCursor: null,
+    };
+
+    let moreVaResults = false;
+    let moreEuropeanaResults = false;
+
+    // Fetch VA results if VA or Both are selected
+    if (
+      (searchSource === "va" || searchSource === "both") &&
+      results.va.length < results.info.record_count
+    ) {
+      const nextPage = vaPage + 1;
+      setVaPage(nextPage);
+
+      newVaResults = await fetchVaSearchResults({
         searchQuery: query,
-        searchMakerId: null,
+        searchMakerId: makerId,
         pageNum: nextPage,
       });
-    } else if (searchSource === "europeana") {
-      await fetchEuropeanaResults(query, europeanaCursor);
-    } else if (searchSource === "both") {
-      await Promise.all([
-        fetchSearchResults({
-          searchQuery: query,
-          searchMakerId: null,
-          pageNum: nextPage,
-        }),
-        fetchEuropeanaResults(query, europeanaCursor),
-      ]);
+
+      moreVaResults =
+        results.info.record_count > results.va.length + newVaResults.va.length;
     }
+
+    // Fetch Europeana results if Europeana or Both are selected
+    if (
+      (searchSource === "europeana" || searchSource === "both") &&
+      europeanaCursor
+    ) {
+      newEuropeanaResults = await fetchEuropeanaResults(query, europeanaCursor);
+
+      setEuropeanaCursor(newEuropeanaResults.nextCursor || null);
+      moreEuropeanaResults = !!newEuropeanaResults.nextCursor;
+    }
+
+    // Update results to append new VA first, then new Europeana
+    setResults((prevResults) => ({
+      va: [...prevResults.va, ...prevResults.europeana, ...newVaResults.va], // Old VA + Old Europeana + New VA
+      europeana: [...newEuropeanaResults.europeana], // Append new Europeana after new VA
+      info: prevResults.info, // Info remains unchanged
+    }));
+
+    // Update hasMore based on whether either source has more results
+    setHasMore(moreVaResults || moreEuropeanaResults);
+
+    setLoading(false); // Stop loading
   };
 
   const filteredResults = onlyWithImages
@@ -231,7 +325,7 @@ const SearchPage: React.FC = () => {
       )
     : [...results.va, ...results.europeana];
 
-  console.log(results);
+  // console.log(results);
 
   const animatedRecordCount = useCountAnimation(
     results.info.record_count || 0,

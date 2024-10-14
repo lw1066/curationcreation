@@ -36,7 +36,7 @@ interface ArtSearchResponse {
   message: string;
   data?: {
     va: VAMItem[];
-    info: VAMItemsInfo;
+    vaItemsInfo: VAMItemsInfo;
   };
 }
 
@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       message: "Art retrieved!",
       data: {
         va: vaItems,
-        info: vaItemsInfo,
+        vaItemsInfo: vaItemsInfo,
       },
     });
   } catch (error) {
