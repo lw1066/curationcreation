@@ -3,16 +3,11 @@
 import { useState, useEffect } from "react";
 import classes from "./exhibition.module.css";
 import ExhibitionItem from "../components/ExhibitionItem";
-
-interface Item {
-  id: string;
-  // Define other necessary properties of Item here
-}
+import { Item } from "../types";
 
 const ExhibitionPage = () => {
   const [exhibitionItems, setExhibitionItems] = useState<Item[]>([]);
 
-  // Load exhibition items from localStorage
   useEffect(() => {
     const storedItems = localStorage.getItem("exhibitionItems");
     if (storedItems) {
