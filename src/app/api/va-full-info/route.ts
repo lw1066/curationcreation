@@ -1,6 +1,6 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
-import { ImageMeta, fullVaItem } from "../../types";
+import { ImageMeta, fullItem } from "../../types";
 
 interface ArtistMakerPerson {
   name: { text: string; id?: string };
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       imagesMeta: metaRecord.images?._images_meta || [],
     };
 
-    const vaFullItem: fullVaItem = {
+    const vaFullItem: fullItem = {
       id: record.systemNumber,
       searchSource: "va",
       maker: makers,
@@ -80,6 +80,8 @@ export async function POST(req: Request) {
       baseImageUrl: metaRecord.images?._iiif_image || "/images/no_image.png",
       briefDescription: record.briefDescription || "No description",
     };
+
+    console.log("vaFullItem ----", vaFullItem);
 
     return NextResponse.json({
       status: 200,

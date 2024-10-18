@@ -1,7 +1,6 @@
-/* Container for the grid */
 .resultsGrid {
   display: grid;
-  grid-gap: 16px; /* Space between grid items */
+  grid-gap: 16px;
   max-width: 80%;
   margin: 50px auto;
 }
@@ -20,26 +19,41 @@
   height: 80px;
 }
 
-.vaLogoContainer {
+.searchLogoContainer {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 54px;
+  height: 54px;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: #ffffff;
   border-radius: 50%;
   margin: 20px 10px 20px 0;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.searchLogoContainer:hover {
+  border-color: blue;
+}
+
+.activeImage {
+  border-color: #2ccd04;
 }
 
 .vaSearchInstructionsContainer {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  margin: 10px;
 }
 
 .vaSearchInstructionsContainer p {
-  width: 50%;
+  width: 75%;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .filtersContainer {
@@ -48,7 +62,7 @@
   text-align: center;
 }
 
-.spinnerContainer {
+.imageSpinnerContainer {
   position: absolute;
   top: 0;
   left: 0;
@@ -57,6 +71,14 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.fetchSpinnerContainer {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
 }
 
 .spinner {
@@ -77,21 +99,18 @@
   }
 }
 
-/* Default: 3 items per row on screens larger than 968px */
 @media (min-width: 968px) {
   .resultsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* 2 items per row for screens between 468px and 968px */
 @media (min-width: 468px) and (max-width: 967px) {
   .resultsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-/* 1 item per row on screens smaller than 468px */
 @media (max-width: 467px) {
   .resultsGrid {
     grid-template-columns: 1fr;
@@ -104,17 +123,16 @@
 
   .vaSearchInstructionsContainer p {
     width: 70%;
-    font-size: 0.9rem;
+    font-size: 0.65rem;
   }
 }
 
-/* Style for individual item cards */
 .itemCard {
   display: flex;
   flex-direction: column;
   align-items: center;
   max-width: 100%;
-  margin: 0; /* Reset margin since grid handles spacing */
+  margin: 0;
 }
 
 .title {

@@ -34,6 +34,7 @@ export interface Item {
   techniques?: Technique[];
   origins?: Origin[];
   baseImageUrl: string;
+
   images?: {
     _iiif_image: string;
     imagesMeta?: ImageMeta[];
@@ -54,9 +55,10 @@ export interface ArtItem {
   description?: string;
 }
 
-export interface fullVaItem {
+export interface fullItem {
   id: string;
   searchSource: string;
+
   title: string;
   maker: Maker[];
   date?: string;

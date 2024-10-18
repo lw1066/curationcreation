@@ -16,20 +16,21 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
   const [showInfo, setShowInfo] = useState(false);
 
   const {
-    imageUrl,
-    searchSource,
+    baseImageUrl,
+    imageUrls,
     title,
-    makerName,
+    searchSource,
     description,
     physicalDescription,
     materials,
     techniques,
     origins,
-    metaImagesCount,
-  } = prepareItemData(item, currentImageIndex);
+    imagesCount,
+    makerName,
+  } = prepareItemData(item);
 
   const handleNextImage = () => {
-    if (currentImageIndex < metaImagesCount - 1) {
+    if (currentImageIndex < imagesCount - 1) {
       setLoading(true);
       setCurrentImageIndex((prevIndex) => prevIndex + 1);
     }
@@ -46,6 +47,9 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
     setShowInfo((prev) => !prev);
   };
 
+  const currentImageUrl =
+    imageUrls?.[currentImageIndex] || "/images/no_image.png";
+
   return (
     <div className={classes.itemCard} key={item.id}>
       <div className={classes.imageContainer}>
@@ -56,7 +60,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
         )}
 
         <Image
-          src={imageUrl}
+          src={currentImageUrl}
           alt={title.join("")}
           fill={true}
           style={{ objectFit: "contain" }}
@@ -71,7 +75,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
           {showInfo ? "Close" : "Info"}
         </button>
 
-        {metaImagesCount > 1 && (
+        {imagesCount > 1 && (
           <>
             <LoadMoreButton
               onClick={handlePreviousImage}
@@ -80,7 +84,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
             />
             <LoadMoreButton
               onClick={handleNextImage}
-              disabled={currentImageIndex === metaImagesCount - 1}
+              disabled={currentImageIndex === imagesCount - 1}
               text="Next"
             />
           </>

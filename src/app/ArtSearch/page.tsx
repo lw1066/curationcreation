@@ -6,7 +6,7 @@ import classes from "./artSearch.module.css";
 import FullItemCard from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
 import useCountAnimation from "../components/useCountAnimation";
-import { fullVaItem, Results, ArtItem } from "../types";
+import { fullItem, Results, ArtItem } from "../types";
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState<string>("");
@@ -16,9 +16,10 @@ const SearchPage: React.FC = () => {
     europeana: [],
     info: { record_count: 0, image_count: 0 },
   });
-  const [loading, setLoading] = useState<boolean>(false);
+  const [vaLoading, setVaLoading] = useState<boolean>(false);
+  const [euroLoading, setEuroLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [fullItem, setFullItem] = useState<fullVaItem | null>(null);
+  const [fullItem, setFullItem] = useState<fullItem | null>(null);
   const [vaPage, setVaPage] = useState<number>(1); // For VA pagination
   const [europeanaCursor, setEuropeanaCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(false);
@@ -26,7 +27,7 @@ const SearchPage: React.FC = () => {
   const [imageLoadingStatus, setImageLoadingStatus] = useState<{
     [id: string]: boolean;
   }>({});
-  const [searchSource, setSearchSource] = useState<"va" | "europeana" | "both">(
+  const [searchType, setSearchType] = useState<"va" | "europeana" | "both">(
     "va"
   );
   const [makerId, setMakerId] = useState<string | null>(null);
@@ -40,7 +41,7 @@ const SearchPage: React.FC = () => {
     searchMakerId: string | null;
     pageNum: number;
   }) => {
-    setLoading(true);
+    setVaLoading(true);
     setError(null);
 
     try {
@@ -62,7 +63,7 @@ const SearchPage: React.FC = () => {
       setError(`An error occurred: ${err}`);
       return { va: [], vaItemsInfo: { record_count: 0, image_count: 0 } };
     } finally {
-      setLoading(false);
+      setVaLoading(false);
     }
   };
 
@@ -71,7 +72,7 @@ const SearchPage: React.FC = () => {
     searchQuery: string | null,
     cursor: string | null
   ) => {
-    setLoading(true);
+    setEuroLoading(true);
     setError(null);
 
     try {
@@ -97,7 +98,7 @@ const SearchPage: React.FC = () => {
         nextCursor: null,
       };
     } finally {
-      setLoading(false);
+      setEuroLoading(false);
     }
   };
 
@@ -113,7 +114,7 @@ const SearchPage: React.FC = () => {
 
     setMakerId(null);
 
-    if (searchSource === "va") {
+    if (searchType === "va") {
       const vaResults = await fetchVaSearchResults({
         searchQuery: query,
         searchMakerId: null,
@@ -135,7 +136,7 @@ const SearchPage: React.FC = () => {
     }
 
     // Handle Europeana-only search
-    else if (searchSource === "europeana") {
+    else if (searchType === "europeana") {
       const europeanaResults = await fetchEuropeanaResults(query, null);
 
       const moreEuropeanaResults = !!europeanaResults.nextCursor;
@@ -153,7 +154,7 @@ const SearchPage: React.FC = () => {
     }
 
     // Handle Both VA and Europeana search
-    else if (searchSource === "both") {
+    else if (searchType === "both") {
       const [vaResults, europeanaResults] = await Promise.all([
         fetchVaSearchResults({
           searchQuery: query,
@@ -185,10 +186,10 @@ const SearchPage: React.FC = () => {
   };
 
   const handleFullInfoRequest = async (item: ArtItem) => {
-    setLoading(true);
     setError(null);
 
     if (item.searchSource === "va") {
+      setVaLoading(true);
       const id = item.id;
       try {
         const response = await axios.post("/api/va-full-info", { id });
@@ -197,16 +198,18 @@ const SearchPage: React.FC = () => {
       } catch (err) {
         setError(`An error occurred: ${err}`);
       } finally {
-        setLoading(false);
+        setVaLoading(false);
       }
     } else if (item.searchSource === "euro") {
+      setEuroLoading(true);
       const fullEuroItem = {
         id: item.id,
         searchSource: "euro",
         title: item.title,
         maker: [{ name: "Europeana does not provide maker" }],
-        date: item.year || "unknown",
-        baseImageUrl: item.fullImage || "/No_Image_Available.jpg",
+        date: item.date || "unknown",
+        baseImageUrl: item.baseImageUrl || "/No_Image_Available.jpg",
+        backupImageUrl: item.baseImageUrl,
         description: `Item provided by ${item.dataProvider}. ${item.description}`,
         physicalDescription: "Not provided",
         materials: [],
@@ -219,7 +222,7 @@ const SearchPage: React.FC = () => {
         briefDescription: "Not provided by Europenana",
       };
       setFullItem(fullEuroItem);
-      setLoading(false);
+      setEuroLoading(false);
     }
   };
 
@@ -231,7 +234,7 @@ const SearchPage: React.FC = () => {
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     });
-    setLoading(true);
+    setVaLoading(true);
     setError(null);
     setMakerId(makerId);
 
@@ -250,7 +253,7 @@ const SearchPage: React.FC = () => {
       },
     });
 
-    setLoading(false);
+    setVaLoading(false);
   };
 
   const closeFullItemDisplay = () => {
@@ -258,9 +261,8 @@ const SearchPage: React.FC = () => {
   };
 
   const loadMoreResults = async () => {
-    if (!hasMore || loading) return;
+    if (!hasMore || vaLoading || euroLoading) return;
 
-    setLoading(true);
     setError(null);
 
     let newVaResults = {
@@ -278,33 +280,46 @@ const SearchPage: React.FC = () => {
 
     // Fetch VA results if VA or Both are selected
     if (
-      (searchSource === "va" || searchSource === "both") &&
+      (searchType === "va" || searchType === "both") &&
       results.va.length < results.info.record_count
     ) {
-      const nextPage = vaPage + 1;
-      setVaPage(nextPage);
+      setVaLoading(true);
+      try {
+        const nextPage = vaPage + 1;
+        setVaPage(nextPage);
 
-      newVaResults = await fetchVaSearchResults({
-        searchQuery: query,
-        searchMakerId: makerId,
-        pageNum: nextPage,
-      });
+        newVaResults = await fetchVaSearchResults({
+          searchQuery: query,
+          searchMakerId: makerId,
+          pageNum: nextPage,
+        });
 
-      moreVaResults =
-        results.info.record_count > results.va.length + newVaResults.va.length;
+        moreVaResults =
+          results.info.record_count >
+          results.va.length + newVaResults.va.length;
+      } finally {
+        setVaLoading(false);
+      }
     }
 
     // Fetch Europeana results if Europeana or Both are selected
     if (
-      (searchSource === "europeana" || searchSource === "both") &&
+      (searchType === "europeana" || searchType === "both") &&
       europeanaCursor
     ) {
-      newEuropeanaResults = await fetchEuropeanaResults(query, europeanaCursor);
+      setEuroLoading(true); // Set loading to true before fetching
+      try {
+        newEuropeanaResults = await fetchEuropeanaResults(
+          query,
+          europeanaCursor
+        );
 
-      setEuropeanaCursor(newEuropeanaResults.nextCursor || null);
-      moreEuropeanaResults = !!newEuropeanaResults.nextCursor;
+        setEuropeanaCursor(newEuropeanaResults.nextCursor || null);
+        moreEuropeanaResults = !!newEuropeanaResults.nextCursor;
+      } finally {
+        setEuroLoading(false); // Ensure loading is stopped after fetching
+      }
     }
-
     // Update results to append new VA first, then new Europeana
     setResults((prevResults) => ({
       va: [...prevResults.va, ...prevResults.europeana, ...newVaResults.va], // Old VA + Old Europeana + New VA
@@ -314,8 +329,6 @@ const SearchPage: React.FC = () => {
 
     // Update hasMore based on whether either source has more results
     setHasMore(moreVaResults || moreEuropeanaResults);
-
-    setLoading(false); // Stop loading
   };
 
   const filteredResults = onlyWithImages
@@ -324,8 +337,6 @@ const SearchPage: React.FC = () => {
           item.baseImageUrl && item.baseImageUrl !== "/images/no_image.png"
       )
     : [...results.va, ...results.europeana];
-
-  // console.log(results);
 
   const animatedRecordCount = useCountAnimation(
     results.info.record_count || 0,
@@ -345,27 +356,26 @@ const SearchPage: React.FC = () => {
 
   return (
     <div>
+      {error && <p>{error}</p>}
       {fullItem && (
-        <FullItemCard
-          item={fullItem}
-          close={closeFullItemDisplay}
-          handleMakerSearch={handleMakerSearch}
-        />
+        <>
+          {console.log(fullItem)}
+          <FullItemCard
+            item={fullItem}
+            close={closeFullItemDisplay}
+            handleMakerSearch={handleMakerSearch}
+          />
+        </>
       )}
       <div className={classes.searchFormContainer}>
         <div className={classes.vaSearchInstructionsContainer}>
-          <span className={classes.vaLogoContainer}>
-            <Image
-              className={classes.vaLogo}
-              src={"/images/Victoria_and_Albert_Museum_Logo.svg"}
-              alt="V and A logo"
-              width={80}
-              height={80}
-            />
-          </span>
           <p>
-            The Victoria and Albert Museum catalogue has over 1 million items
-            (500k images) covering 5000 years of human creativity!
+            Enter a search term and choose either collection or both to search
+            for items.
+          </p>
+          <p>
+            The search term can be anything! An artist, a place, an object - see
+            what you find!
           </p>
         </div>
         <form
@@ -386,30 +396,56 @@ const SearchPage: React.FC = () => {
             style={{ width: "65%", marginBottom: "20px" }}
           />
 
-          <div>
-            <button
-              type="button"
-              onClick={() => setSearchSource("va")}
-              className={searchSource === "va" ? classes.activeButton : ""}
+          <div style={{ display: "flex", gap: "20px" }}>
+            <div
+              onClick={() => {
+                setSearchType((prevType) =>
+                  prevType === "va"
+                    ? "europeana"
+                    : prevType === "europeana"
+                    ? "both"
+                    : "va"
+                );
+              }}
+              style={{ cursor: "pointer" }}
+              className={`${classes.searchLogoContainer} ${
+                searchType === "va" || searchType === "both"
+                  ? classes.activeImage
+                  : ""
+              }`}
             >
-              VA Search
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchSource("europeana")}
-              className={
-                searchSource === "europeana" ? classes.activeButton : ""
-              }
+              <Image
+                src="/images/Victoria_and_Albert_Museum_Logo.svg"
+                alt="VA Search"
+                width={45}
+                height={45}
+              />
+            </div>
+
+            <div
+              onClick={() => {
+                setSearchType((prevType) =>
+                  prevType === "europeana"
+                    ? "va"
+                    : prevType === "va"
+                    ? "both"
+                    : "europeana"
+                );
+              }}
+              style={{ cursor: "pointer" }}
+              className={`${classes.searchLogoContainer} ${
+                searchType === "europeana" || searchType === "both"
+                  ? classes.activeImage
+                  : ""
+              }`}
             >
-              Europeana Search
-            </button>
-            <button
-              type="button"
-              onClick={() => setSearchSource("both")}
-              className={searchSource === "both" ? classes.activeButton : ""}
-            >
-              Both
-            </button>
+              <Image
+                src="/images/euroLogo.png"
+                alt="Europeana Search"
+                width={45}
+                height={45}
+              />
+            </div>
           </div>
 
           <LoadMoreButton
@@ -433,69 +469,75 @@ const SearchPage: React.FC = () => {
               images
             </p>
 
-            <input
-              type="checkbox"
-              id="onlyWithImages"
-              checked={onlyWithImages}
-              onChange={(e) => setOnlyWithImages(e.target.checked)}
-            />
-            <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
-              Only show items with images
-            </label>
+            {searchType != "europeana" && (
+              <>
+                <input
+                  type="checkbox"
+                  id="onlyWithImages"
+                  checked={onlyWithImages}
+                  onChange={(e) => setOnlyWithImages(e.target.checked)}
+                />
+                <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
+                  Only show items with images
+                </label>
+              </>
+            )}
           </div>
         )}
       </div>
 
-      {loading && (
-        <div className={classes.spinnerContainer}>
-          <div className={classes.spinner}></div>
-        </div>
-      )}
-      {error && <p>{error}</p>}
-
       <div>
-        {filteredResults.length > 0 && (
-          <div className={classes.resultsGrid}>
-            {filteredResults.map((item) => (
-              <div className={classes.itemCard} key={item.id}>
-                <div
-                  style={{
-                    position: "relative",
-                    width: "100%",
-                    height: "200px",
-                  }}
-                >
-                  {imageLoadingStatus[item.id] !== false && (
-                    <div className={classes.spinnerContainer}>
-                      <div className={classes.spinner}></div>
-                    </div>
-                  )}
-
-                  <Image
-                    src={
-                      item.baseImageUrl &&
-                      item.baseImageUrl !== "/images/no_image.png"
-                        ? item.baseImageUrl
-                        : "/images/no_image.png"
-                    }
-                    fill
-                    sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    quality={100}
-                    style={{ objectFit: "contain" }}
-                    alt={item.title}
-                    onLoad={() => handleImageLoad(item.id)}
-                    onClick={() => handleFullInfoRequest(item)}
-                  />
-                </div>
-                <p className={classes.title}>{item.title}</p>
-                <p className={classes.info}>{item.maker?.name}</p>
-                <p className={classes.info}>{item.date}</p>
-              </div>
-            ))}
+        {(vaLoading || euroLoading) && (
+          <div className={classes.fetchSpinnerContainer}>
+            <div className={classes.spinner}></div>
           </div>
         )}
-        {hasMore && (
-          <LoadMoreButton onClick={loadMoreResults} disabled={loading} />
+        {filteredResults.length > 0 && (
+          <div className={classes.resultsGrid}>
+            {filteredResults.map((item) => {
+              // console.log("item in filterfunction----", item);
+              return (
+                <div className={classes.itemCard} key={item.id}>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "200px",
+                    }}
+                  >
+                    {imageLoadingStatus[item.id] !== false && (
+                      <div className={classes.imageSpinnerContainer}>
+                        <div className={classes.spinner}></div>
+                      </div>
+                    )}
+
+                    <Image
+                      src={
+                        item.baseImageUrl &&
+                        item.baseImageUrl !== "/images/no_image.png"
+                          ? item.baseImageUrl
+                          : "/images/no_image.png"
+                      }
+                      fill
+                      sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      quality={100}
+                      style={{ objectFit: "contain" }}
+                      alt={item.title}
+                      onLoad={() => handleImageLoad(item.id)}
+                      onClick={() => handleFullInfoRequest(item)}
+                    />
+                  </div>
+                  <p className={classes.title}>{item.title}</p>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        {hasMore && !vaLoading && !euroLoading && (
+          <LoadMoreButton
+            onClick={loadMoreResults}
+            disabled={vaLoading || euroLoading}
+          />
         )}
       </div>
     </div>

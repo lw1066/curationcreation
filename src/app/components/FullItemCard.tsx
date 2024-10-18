@@ -1,4 +1,4 @@
-import { useState, MouseEvent, useEffect } from "react";
+import { useState, MouseEvent, useEffect, SyntheticEvent } from "react";
 import Image from "next/image";
 import classes from "./fullItemCard.module.css";
 import TriangleButton from "./TriangleButton";
@@ -24,7 +24,8 @@ const FullItemCard = ({
 
   // Prepare item data based on the current image index
   const {
-    imageUrl,
+    baseImageUrl,
+    imageUrls,
     title,
     searchSource,
     description,
@@ -32,15 +33,15 @@ const FullItemCard = ({
     materials,
     techniques,
     origins,
-    metaImagesCount,
-  } = prepareItemData(item, currentImageIndex);
+    imagesCount,
+  } = prepareItemData(item);
 
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
   };
 
   const handleNextImage = () => {
-    if (currentImageIndex < metaImagesCount - 1) {
+    if (currentImageIndex < imagesCount - 1) {
       setLoading(true);
       setCurrentImageIndex((prevIndex) => prevIndex + 1);
     }
@@ -55,6 +56,10 @@ const FullItemCard = ({
 
   const handleImageLoad = () => {
     setLoading(false);
+  };
+
+  const handleImageError = (e: SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = baseImageUrl;
   };
 
   const addItemToExhibition = () => {
@@ -103,6 +108,9 @@ const FullItemCard = ({
     setIsInExhibition(isItemInExhibition);
   }, [item]);
 
+  const currentImageUrl =
+    imageUrls?.[currentImageIndex] || "/images/no_image.png";
+
   return (
     <div className={classes.overlay} onClick={close}>
       <div className={classes.centeredContainer} onClick={handleClickInside}>
@@ -113,17 +121,18 @@ const FullItemCard = ({
             </div>
           )}
           <Image
-            src={imageUrl}
+            src={currentImageUrl}
             alt={title[0]}
             fill={true}
             style={{ objectFit: "contain" }}
             quality={100}
             sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
             onLoad={handleImageLoad}
+            onError={handleImageError}
           />
         </div>
 
-        {metaImagesCount > 1 && (
+        {imagesCount > 1 && (
           <div className={classes.imageControls}>
             <LoadMoreButton
               onClick={handlePreviousImage}
@@ -133,7 +142,7 @@ const FullItemCard = ({
             <p style={{ fontSize: ".5rem", lineHeight: "40px" }}>More images</p>
             <LoadMoreButton
               onClick={handleNextImage}
-              disabled={currentImageIndex === metaImagesCount - 1 || loading}
+              disabled={currentImageIndex === imagesCount - 1 || loading}
               text="Next"
             />
           </div>
