@@ -16,7 +16,6 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
   const [showInfo, setShowInfo] = useState(false);
 
   const {
-    baseImageUrl,
     imageUrls,
     title,
     searchSource,
