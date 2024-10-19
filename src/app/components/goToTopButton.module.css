@@ -1,0 +1,25 @@
+.goToTopButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: transparent;
+  color: green;
+  border: 2px solid green;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.goToTopButton:hover {
+  background-color: green;
+  color: black;
+  opacity: 0.8;
+}

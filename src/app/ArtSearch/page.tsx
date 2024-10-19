@@ -1,23 +1,26 @@
 "use client";
 import { useState } from "react";
-import axios from "axios";
 import Image from "next/image";
 import classes from "./artSearch.module.css";
 import FullItemCard from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
 import useCountAnimation from "../components/useCountAnimation";
 import { fullItem, Results, ArtItem } from "../types";
+import { fetchFullInfo } from "../utils/fetchFullInfo";
+import {
+  fetchEuropeanaResults,
+  fetchVaSearchResults,
+} from "../utils/apiFetches";
 
 const SearchPage: React.FC = () => {
   const [query, setQuery] = useState<string>("");
-  // const [makerId, setMakerId] = useState<string | null>(null);
   const [results, setResults] = useState<Results>({
     va: [],
     europeana: [],
     info: { record_count: 0, image_count: 0 },
   });
-  const [vaLoading, setVaLoading] = useState<boolean>(false);
-  const [euroLoading, setEuroLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
   const [error, setError] = useState<string | null>(null);
   const [fullItem, setFullItem] = useState<fullItem | null>(null);
   const [vaPage, setVaPage] = useState<number>(1); // For VA pagination
@@ -32,76 +35,6 @@ const SearchPage: React.FC = () => {
   );
   const [makerId, setMakerId] = useState<string | null>(null);
 
-  const fetchVaSearchResults = async ({
-    searchQuery,
-    searchMakerId,
-    pageNum,
-  }: {
-    searchQuery: string | null;
-    searchMakerId: string | null;
-    pageNum: number;
-  }) => {
-    setVaLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.post("/api/art-search", {
-        query: searchQuery,
-        makerId: searchMakerId,
-        start: pageNum,
-        rows: 15,
-      });
-
-      const fetchedResults = response.data.data;
-
-      // Return the fetched results to be handled in handleSubmit
-      return {
-        va: fetchedResults.va,
-        vaItemsInfo: fetchedResults.vaItemsInfo,
-      };
-    } catch (err) {
-      setError(`An error occurred: ${err}`);
-      return { va: [], vaItemsInfo: { record_count: 0, image_count: 0 } };
-    } finally {
-      setVaLoading(false);
-    }
-  };
-
-  // Fetch Europeana results
-  const fetchEuropeanaResults = async (
-    searchQuery: string | null,
-    cursor: string | null
-  ) => {
-    setEuroLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.post("/api/europeana-search", {
-        query: searchQuery,
-        cursor: cursor || "*",
-        rows: 10,
-      });
-
-      const fetchedResults = response.data.data;
-
-      // Return the fetched results to be handled in handleSubmit
-      return {
-        europeana: fetchedResults.europeana,
-        EItemsInfo: fetchedResults.EItemsInfo,
-        nextCursor: response.data.nextCursor ?? null,
-      };
-    } catch (err) {
-      setError(`An error occurred: ${err}`);
-      return {
-        europeana: [],
-        EItemsInfo: { record_count: 0, image_count: 0 },
-        nextCursor: null,
-      };
-    } finally {
-      setEuroLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setVaPage(1);
@@ -115,6 +48,7 @@ const SearchPage: React.FC = () => {
     setMakerId(null);
 
     if (searchType === "va") {
+      setLoading(true);
       const vaResults = await fetchVaSearchResults({
         searchQuery: query,
         searchMakerId: null,
@@ -133,10 +67,12 @@ const SearchPage: React.FC = () => {
         },
       });
       setHasMore(moreVaResults);
+      setLoading(false);
     }
 
     // Handle Europeana-only search
     else if (searchType === "europeana") {
+      setLoading(true);
       const europeanaResults = await fetchEuropeanaResults(query, null);
 
       const moreEuropeanaResults = !!europeanaResults.nextCursor;
@@ -151,10 +87,13 @@ const SearchPage: React.FC = () => {
         },
       });
       setHasMore(moreEuropeanaResults);
+      setLoading(false);
     }
 
     // Handle Both VA and Europeana search
     else if (searchType === "both") {
+      setLoading(true);
+
       const [vaResults, europeanaResults] = await Promise.all([
         fetchVaSearchResults({
           searchQuery: query,
@@ -182,48 +121,16 @@ const SearchPage: React.FC = () => {
         },
       });
       setHasMore(moreVaResults || moreEuropeanaResults);
+      setLoading(false);
     }
   };
 
   const handleFullInfoRequest = async (item: ArtItem) => {
+    setLoading(true);
     setError(null);
-
-    if (item.searchSource === "va") {
-      setVaLoading(true);
-      const id = item.id;
-      try {
-        const response = await axios.post("/api/va-full-info", { id });
-
-        setFullItem(response.data.data.vaFullItem);
-      } catch (err) {
-        setError(`An error occurred: ${err}`);
-      } finally {
-        setVaLoading(false);
-      }
-    } else if (item.searchSource === "euro") {
-      setEuroLoading(true);
-      const fullEuroItem = {
-        id: item.id,
-        searchSource: "euro",
-        title: item.title,
-        maker: [{ name: "Europeana does not provide maker" }],
-        date: item.date || "unknown",
-        baseImageUrl: item.baseImageUrl || "/No_Image_Available.jpg",
-        backupImageUrl: item.baseImageUrl,
-        description: `Item provided by ${item.dataProvider}. ${item.description}`,
-        physicalDescription: "Not provided",
-        materials: [],
-        techniques: [],
-        placesOfOrigin: [],
-        productionDates: [],
-        images: {
-          _iiif_image: item.fullImage || "/images/no_image.png",
-        },
-        briefDescription: "Not provided by Europenana",
-      };
-      setFullItem(fullEuroItem);
-      setEuroLoading(false);
-    }
+    const fullItem = await fetchFullInfo(item);
+    setFullItem(fullItem);
+    setLoading(false);
   };
 
   const handleMakerSearch = async (makerId: string) => {
@@ -234,7 +141,7 @@ const SearchPage: React.FC = () => {
       europeana: [],
       info: { record_count: 0, image_count: 0 },
     });
-    setVaLoading(true);
+    setLoading(true);
     setError(null);
     setMakerId(makerId);
 
@@ -253,7 +160,7 @@ const SearchPage: React.FC = () => {
       },
     });
 
-    setVaLoading(false);
+    setLoading(false);
   };
 
   const closeFullItemDisplay = () => {
@@ -261,7 +168,7 @@ const SearchPage: React.FC = () => {
   };
 
   const loadMoreResults = async () => {
-    if (!hasMore || vaLoading || euroLoading) return;
+    if (!hasMore || loading) return;
 
     setError(null);
 
@@ -283,7 +190,7 @@ const SearchPage: React.FC = () => {
       (searchType === "va" || searchType === "both") &&
       results.va.length < results.info.record_count
     ) {
-      setVaLoading(true);
+      setLoading(true);
       try {
         const nextPage = vaPage + 1;
         setVaPage(nextPage);
@@ -298,16 +205,15 @@ const SearchPage: React.FC = () => {
           results.info.record_count >
           results.va.length + newVaResults.va.length;
       } finally {
-        setVaLoading(false);
+        setLoading(false);
       }
     }
 
-    // Fetch Europeana results if Europeana or Both are selected
     if (
       (searchType === "europeana" || searchType === "both") &&
       europeanaCursor
     ) {
-      setEuroLoading(true); // Set loading to true before fetching
+      setLoading(true);
       try {
         newEuropeanaResults = await fetchEuropeanaResults(
           query,
@@ -317,17 +223,16 @@ const SearchPage: React.FC = () => {
         setEuropeanaCursor(newEuropeanaResults.nextCursor || null);
         moreEuropeanaResults = !!newEuropeanaResults.nextCursor;
       } finally {
-        setEuroLoading(false); // Ensure loading is stopped after fetching
+        setLoading(false);
       }
     }
-    // Update results to append new VA first, then new Europeana
+
     setResults((prevResults) => ({
-      va: [...prevResults.va, ...prevResults.europeana, ...newVaResults.va], // Old VA + Old Europeana + New VA
-      europeana: [...newEuropeanaResults.europeana], // Append new Europeana after new VA
-      info: prevResults.info, // Info remains unchanged
+      va: [...prevResults.va, ...prevResults.europeana, ...newVaResults.va],
+      europeana: [...newEuropeanaResults.europeana],
+      info: prevResults.info,
     }));
 
-    // Update hasMore based on whether either source has more results
     setHasMore(moreVaResults || moreEuropeanaResults);
   };
 
@@ -487,7 +392,7 @@ const SearchPage: React.FC = () => {
       </div>
 
       <div>
-        {(vaLoading || euroLoading) && (
+        {loading && (
           <div className={classes.fetchSpinnerContainer}>
             <div className={classes.spinner}></div>
           </div>
@@ -533,11 +438,8 @@ const SearchPage: React.FC = () => {
             })}
           </div>
         )}
-        {hasMore && !vaLoading && !euroLoading && (
-          <LoadMoreButton
-            onClick={loadMoreResults}
-            disabled={vaLoading || euroLoading}
-          />
+        {hasMore && !loading && (
+          <LoadMoreButton onClick={loadMoreResults} disabled={loading} />
         )}
       </div>
     </div>

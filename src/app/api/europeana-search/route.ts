@@ -45,7 +45,7 @@ interface ApiResponse {
       id: string;
       title: string;
       description: string;
-      maker: string;
+      maker: { name: string; id?: string };
       dataProvider: string;
       date: string;
       country: string;
@@ -110,7 +110,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
           }
         };
 
-        console.log(response.data.items[0]);
+        // console.log(response.data.items[0]);
 
         const newFilteredItems = response.data.items.filter(
           (item: EuropeanaItem) => {
@@ -126,14 +126,21 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
 
             const lowercaseQuery = query.toLowerCase();
 
-            const queryInDcCreator = item.dcCreator?.some((creator: string) =>
-              creator.toLowerCase().includes(lowercaseQuery)
-            );
+            const queryInDcCreator = Array.isArray(item.dcCreator)
+              ? item.dcCreator.some((creator: string) =>
+                  creator.toLowerCase().includes(lowercaseQuery)
+                )
+              : item.dcCreator?.toLowerCase().includes(lowercaseQuery);
 
-            const queryInDcSubject = item.dcSubjectLangAware?.en?.some(
-              (subject: string) =>
-                subject.toLowerCase().includes(lowercaseQuery)
-            );
+            const queryInDcSubject = Array.isArray(item.dcSubjectLangAware?.en)
+              ? item.dcSubjectLangAware.en.some((subject: string) =>
+                  subject.toLowerCase().includes(lowercaseQuery)
+                )
+              : typeof item.dcSubjectLangAware?.en === "string"
+              ? item.dcSubjectLangAware.en
+                  .toLowerCase()
+                  .includes(lowercaseQuery)
+              : false;
 
             let queryInTitle = false;
             if (typeof item.title === "string") {
@@ -164,7 +171,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       }
     }
 
-    console.log(filteredItems[1]);
+    // console.log(filteredItems[1]);
 
     const items = filteredItems.map((item) => ({
       id: item.id,

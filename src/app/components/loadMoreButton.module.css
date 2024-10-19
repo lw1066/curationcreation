@@ -8,15 +8,18 @@
   justify-content: center;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-weight: 600;
 }
 
 .loadMoreButton:hover {
-  background-color: #10681446;
+  background-color: green;
+  color: black;
 }
 
 .loadMoreButton:disabled {
   color: transparent;
   cursor: not-allowed;
+  background-color: transparent;
 }
 
 .buttonContainer {

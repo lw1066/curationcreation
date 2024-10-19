@@ -154,33 +154,34 @@ const FullItemCard = ({
             dangerouslySetInnerHTML={{ __html: title[0] }}
           />
 
-          {searchSource === "va" && (
-            <p>
-              <strong>Makers:</strong>{" "}
-              {item.maker?.length ? (
-                item.maker.map((maker, index) => (
-                  <span key={index}>
-                    {maker.id ? (
-                      <span
-                        onClick={() => {
-                          handleMakerSearch(maker.id!);
-                          close();
-                        }}
-                        className={classes.clickableMaker} // Class applied if maker has an id
-                      >
-                        {maker.name}
-                      </span>
-                    ) : (
-                      maker.name
-                    )}
-                    {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
-                  </span>
-                ))
-              ) : (
-                <span>Not available</span>
-              )}
-            </p>
-          )}
+          {searchSource === "va" ||
+            (searchSource === "euro" && (
+              <p>
+                <strong>Makers:</strong>{" "}
+                {item.maker?.length ? (
+                  item.maker.map((maker, index) => (
+                    <span key={index}>
+                      {maker.id ? (
+                        <span
+                          onClick={() => {
+                            handleMakerSearch(maker.id!);
+                            close();
+                          }}
+                          className={classes.clickableMaker} // Class applied if maker has an id
+                        >
+                          {maker.name}
+                        </span>
+                      ) : (
+                        maker.name
+                      )}
+                      {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
+                    </span>
+                  ))
+                ) : (
+                  <span>Not available</span>
+                )}
+              </p>
+            ))}
           <p>
             <strong>Description:</strong>{" "}
             <span dangerouslySetInnerHTML={{ __html: description }} />
