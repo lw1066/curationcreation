@@ -5,7 +5,7 @@ import classes from "./artSearch.module.css";
 import FullItemCard from "../components/FullItemCard";
 import LoadMoreButton from "../components/LoadMoreButton";
 import useCountAnimation from "../components/useCountAnimation";
-import { fullItem, Results, ArtItem } from "../types";
+import { Item, Results, ArtItem } from "../types";
 import { fetchFullInfo } from "../utils/fetchFullInfo";
 import {
   fetchEuropeanaResults,
@@ -22,7 +22,7 @@ const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [error, setError] = useState<string | null>(null);
-  const [fullItem, setFullItem] = useState<fullItem | null>(null);
+  const [fullItem, setFullItem] = useState<Item | null>(null);
   const [vaPage, setVaPage] = useState<number>(1); // For VA pagination
   const [europeanaCursor, setEuropeanaCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(false);
@@ -128,7 +128,37 @@ const SearchPage: React.FC = () => {
   const handleFullInfoRequest = async (item: ArtItem) => {
     setLoading(true);
     setError(null);
-    const fullItem = await fetchFullInfo(item);
+    let fullItem;
+
+    if (item.searchSource === "va") {
+      fullItem = await fetchFullInfo(item.id);
+    }
+
+    if (item.searchSource === "euro") {
+      fullItem = {
+        id: item.id,
+        searchSource: "euro",
+        title: item.title,
+        maker: item.maker?.name,
+        date: item.date || "unknown",
+        baseImageUrl: item.baseImageUrl || "/No_Image_Available.jpg",
+        description: item.description,
+        provider: item.dataProvider,
+        physicalDescription: "Not provided",
+        subject: item.subject,
+        materials: [],
+        techniques: [],
+        placesOfOrigin: [],
+        productionDates: [],
+        imageUrls: [item.baseImageUrl],
+        imagesCount: 1,
+        briefDescription: "Not provided",
+        country: item.country,
+        sourceLink: item.sourceLink,
+      };
+    }
+
+    console.log("here");
     setFullItem(fullItem);
     setLoading(false);
   };
@@ -264,7 +294,7 @@ const SearchPage: React.FC = () => {
       {error && <p>{error}</p>}
       {fullItem && (
         <>
-          {console.log(fullItem)}
+          {console.log("295 in artSearch:::::", fullItem)}
           <FullItemCard
             item={fullItem}
             close={closeFullItemDisplay}
@@ -274,10 +304,6 @@ const SearchPage: React.FC = () => {
       )}
       <div className={classes.searchFormContainer}>
         <div className={classes.vaSearchInstructionsContainer}>
-          <p>
-            Enter a search term and choose either collection or both to search
-            for items.
-          </p>
           <p>
             The search term can be anything! An artist, a place, an object - see
             what you find!
@@ -300,6 +326,9 @@ const SearchPage: React.FC = () => {
             required
             style={{ width: "65%", marginBottom: "20px" }}
           />
+          <div className={classes.vaSearchInstructionsContainer}>
+            <p>Choose collection(s) to search for items.</p>
+          </div>
 
           <div style={{ display: "flex", gap: "20px" }}>
             <div

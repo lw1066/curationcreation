@@ -27,7 +27,7 @@
 .largeC {
   font-size: 130px;
   /* line-height: 1; */
-  color: rgb(255, 255, 255);
+  color: transparent;
   animation: changeColorC 8s forwards;
 }
 
@@ -63,7 +63,7 @@
 
 @keyframes changeColorC {
   0% {
-    color: rgb(255, 255, 255);
+    color: transparent;
   }
   33.3% {
     color: green;

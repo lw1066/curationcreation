@@ -1,5 +1,7 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
+import { Item } from "../../types";
+import sanitizeHtml from "sanitize-html";
 
 interface EuropeanaItem {
   id: string;
@@ -41,20 +43,8 @@ interface ApiResponse {
   success: boolean;
   message: string;
   data: {
-    europeana: Array<{
-      id: string;
-      title: string;
-      description: string;
-      maker: { name: string; id?: string };
-      dataProvider: string;
-      date: string;
-      country: string;
-      baseImageUrl: string;
-      fullImage?: string;
-      sourceLink?: string;
-      rights: string;
-      subject: string | string[];
-    }>;
+    europeana: Item[];
+
     EItemsInfo: {
       record_count: number;
       image_count: number;
@@ -63,6 +53,13 @@ interface ApiResponse {
 
   nextCursor?: string;
 }
+
+const sanitizeHTML = (htmlString: string): string => {
+  return sanitizeHtml(htmlString, {
+    allowedTags: ["i", "em", "b", "strong", "br", "p"],
+    allowedAttributes: {}, // Add allowed attributes if needed
+  });
+};
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
   try {
@@ -178,75 +175,84 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       completeness: item.completeness,
       searchSource: "euro",
       //get title
-      title: item.dcTitleLangAware?.en
-        ? Array.isArray(item.dcTitleLangAware.en)
-          ? `1 ${item.dcTitleLangAware.en[0]}`
-          : `2 ${item.dcTitleLangAware.en}`
-        : item.dcTitle
-        ? Array.isArray(item.dcTitle)
-          ? `3 ${item.dcTitle.join(" ")}`
-          : `4 ${item.dcTitle}`
-        : item.title
-        ? Array.isArray(item.title)
-          ? `5 ${item.title.join(" ")}`
-          : `6 ${item.title}`
-        : " Untitled",
+      title: sanitizeHTML(
+        item.dcTitleLangAware?.en
+          ? Array.isArray(item.dcTitleLangAware.en)
+            ? item.dcTitleLangAware.en[0]
+            : item.dcTitleLangAware.en
+          : item.dcTitle
+          ? Array.isArray(item.dcTitle)
+            ? item.dcTitle.join(" ")
+            : item.dcTitle
+          : item.title
+          ? Array.isArray(item.title)
+            ? item.title.join(" ")
+            : item.title
+          : " Untitled"
+      ),
       //get description
-      description: item.dcDescriptionLangAware?.en
-        ? Array.isArray(item.dcDescriptionLangAware.en)
-          ? `1 ${item.dcDescriptionLangAware.en.join(" ")}`
-          : `2 ${item.dcDescriptionLangAware.en}`
-        : item.dcDescription
-        ? Array.isArray(item.dcDescription)
-          ? `3 ${item.dcDescription.join(" ")}`
-          : `4 ${item.dcDescription}`
-        : item.description
-        ? Array.isArray(item.description)
-          ? `5 ${item.description.join(" ")}`
-          : `6 ${item.description}`
-        : "Not provided",
+      description: sanitizeHTML(
+        item.dcDescriptionLangAware?.en
+          ? Array.isArray(item.dcDescriptionLangAware.en)
+            ? item.dcDescriptionLangAware.en.join(" ")
+            : item.dcDescriptionLangAware.en
+          : item.dcDescription
+          ? Array.isArray(item.dcDescription)
+            ? item.dcDescription.join(" ")
+            : item.dcDescription
+          : item.description
+          ? Array.isArray(item.description)
+            ? item.description.join(" ")
+            : item.description
+          : "Not provided"
+      ),
       //get maker
-      maker: {
-        name: item.dcCreatorLangAware?.en
-          ? Array.isArray(item.dcCreatorLangAware.en)
-            ? `1 ${item.dcCreatorLangAware.en.join(" ")}`
-            : `2 ${item.dcCreatorLangAware.en}`
-          : item.dcCreator
-          ? Array.isArray(item.dcCreator)
-            ? `3 ${item.dcCreator.join(" ")}`
-            : `4 ${item.dcCreator}`
-          : item.creator
-          ? Array.isArray(item.creator)
-            ? `5 ${item.creator.join(" ")}`
-            : `6 ${item.creator}`
-          : "Not provided",
-      },
+      maker: [
+        {
+          name: item.dcCreatorLangAware?.en
+            ? Array.isArray(item.dcCreatorLangAware.en)
+              ? item.dcCreatorLangAware.en.join(" ")
+              : item.dcCreatorLangAware.en
+            : item.dcCreator
+            ? Array.isArray(item.dcCreator)
+              ? item.dcCreator.join(" ")
+              : item.dcCreator
+            : item.creator
+            ? Array.isArray(item.creator)
+              ? item.creator.join(" ")
+              : item.creator
+            : "Not provided",
+        },
+      ],
       //get subject
       subject: item.dcSubjectLangAware?.en
         ? Array.isArray(item.dcSubjectLangAware.en)
-          ? `1 ${item.dcSubjectLangAware.en.join(" | ")}`
-          : `2 ${item.dcSubjectLangAware.en}`
+          ? item.dcSubjectLangAware.en.join(" | ")
+          : item.dcSubjectLangAware.en
         : item.dcSubject
         ? Array.isArray(item.dcSubject)
-          ? `3 ${item.dcSubject.join(" | ")}`
-          : `4 ${item.dcSubject}`
+          ? item.dcSubject.join(" | ")
+          : item.dcSubject
         : item.subject
         ? Array.isArray(item.subject)
-          ? `5 ${item.subject.join(" | ")}`
-          : `6 ${item.subject}`
+          ? item.subject.join(" | ")
+          : item.subject
         : "Not provided",
-      dataProvider: item.dataProvider?.[0] || "Unknown provider",
+      dataProvider: item.dataProvider?.[0] || "Not provided",
       date: item.year
         ? Array.isArray(item.year)
-          ? `1 ${item.year.join(" - ")}`
-          : `2 ${item.year}`
+          ? item.year.join(" - ")
+          : item.year
         : "Not provided",
       country: item.country?.[0] || "Not provided",
       baseImageUrl: item.edmPreview?.[0] || "/No_Image_Available.jpg",
       fullImage: item.edmIsShownBy?.[0],
       sourceLink: item.edmIsShownAt?.[0],
       rights: item.rights?.[0] || "Unknown rights",
+      imagesCount: 1,
     }));
+
+    console.log(items);
 
     return NextResponse.json({
       status: 200,

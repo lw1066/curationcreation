@@ -3,8 +3,8 @@ import Image from "next/image";
 import classes from "./fullItemCard.module.css";
 import TriangleButton from "./TriangleButton";
 import LoadMoreButton from "./LoadMoreButton";
-import prepareItemData from "../utils/prepareItemData";
 import { Item } from "../types";
+import { checkSourceLink } from "../utils/checkSourceLink";
 
 // Define prop types for VaItemDisplay component
 interface FullItemCardProps {
@@ -21,20 +21,39 @@ const FullItemCard = ({
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [isInExhibition, setIsInExhibition] = useState<boolean>(false);
+  const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
 
-  // Prepare item data based on the current image index
   const {
     baseImageUrl,
     imageUrls,
     title,
-    searchSource,
     description,
     physicalDescription,
     materials,
     techniques,
-    origins,
+    placesOfOrigin,
     imagesCount,
-  } = prepareItemData(item);
+    subject,
+    maker,
+    productionDates,
+    date,
+    provider,
+    country,
+    sourceLink,
+  } = item;
+
+  useEffect(() => {
+    const validateLink = async () => {
+      if (item.sourceLink) {
+        const isValid = await checkSourceLink(item.sourceLink);
+        setIsLinkValid(isValid);
+      } else {
+        setIsLinkValid(false);
+      }
+    };
+
+    validateLink();
+  }, [item.sourceLink]);
 
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -122,7 +141,7 @@ const FullItemCard = ({
           )}
           <Image
             src={currentImageUrl}
-            alt={title[0]}
+            alt={title}
             fill={true}
             style={{ objectFit: "contain" }}
             quality={100}
@@ -132,7 +151,7 @@ const FullItemCard = ({
           />
         </div>
 
-        {imagesCount > 1 && (
+        {imagesCount && imagesCount > 1 && (
           <div className={classes.imageControls}>
             <LoadMoreButton
               onClick={handlePreviousImage}
@@ -151,90 +170,141 @@ const FullItemCard = ({
         <div className={classes.fullItemCard}>
           <h2
             className={classes.title}
-            dangerouslySetInnerHTML={{ __html: title[0] }}
+            dangerouslySetInnerHTML={{ __html: title }}
           />
 
-          {searchSource === "va" ||
-            (searchSource === "euro" && (
-              <p>
-                <strong>Makers:</strong>{" "}
-                {item.maker?.length ? (
-                  item.maker.map((maker, index) => (
-                    <span key={index}>
-                      {maker.id ? (
-                        <span
-                          onClick={() => {
-                            handleMakerSearch(maker.id!);
-                            close();
-                          }}
-                          className={classes.clickableMaker} // Class applied if maker has an id
-                        >
-                          {maker.name}
-                        </span>
-                      ) : (
-                        maker.name
-                      )}
-                      {index < (item.maker?.length ?? 0) - 1 ? ", " : ""}{" "}
+          {maker && maker.length > 0 && maker[0].name != "Not provided" && (
+            <p>
+              <strong>Makers:</strong>{" "}
+              {item.maker?.map((maker, index) => (
+                <span key={index}>
+                  {maker.id ? (
+                    <span
+                      onClick={() => {
+                        handleMakerSearch(maker.id!);
+                        close();
+                      }}
+                      className={classes.clickableMaker}
+                    >
+                      {maker.name}
                     </span>
-                  ))
-                ) : (
-                  <span>Not available</span>
-                )}
+                  ) : (
+                    maker.name
+                  )}
+                  {index < (item.maker?.length ?? 0) - 1 ? " | " : ""}
+                </span>
+              ))}
+            </p>
+          )}
+
+          {productionDates &&
+            productionDates.length > 0 &&
+            productionDates[0].date?.text && (
+              <p>
+                <strong>Date:</strong> {productionDates[0].date?.text}
               </p>
-            ))}
-          <p>
-            <strong>Description:</strong>{" "}
-            <span dangerouslySetInnerHTML={{ __html: description }} />
-          </p>
-          {searchSource === "va" && (
+            )}
+
+          {date && date != "Not provided" && (
+            <p>
+              <strong>Date:</strong> {date}
+            </p>
+          )}
+
+          {subject && subject != "Not provided" && <p>{subject}</p>}
+
+          {description && description != "Not provided" && (
+            <p>
+              <strong>Description:</strong>{" "}
+              <span dangerouslySetInnerHTML={{ __html: description }} />
+            </p>
+          )}
+
+          {physicalDescription && physicalDescription != "Not provided" && (
+            <p>
+              <strong>Physical Description:</strong>{" "}
+              <span dangerouslySetInnerHTML={{ __html: physicalDescription }} />
+            </p>
+          )}
+
+          {materials && materials.length > 0 && (
+            <div>
+              <strong>Materials:</strong>{" "}
+              {materials.map((material, index) => (
+                <span key={index}>
+                  {material.text}
+                  {index < materials.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {techniques && techniques.length > 0 && (
+            <div>
+              <strong>Techniques:</strong>{" "}
+              {techniques.map((technique, index) => (
+                <span key={index}>
+                  {technique.text}
+                  {index < techniques.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {placesOfOrigin && placesOfOrigin.length > 0 && (
+            <div>
+              <strong>Origins:</strong>{" "}
+              {placesOfOrigin.map((origin, index) => (
+                <span key={index}>
+                  {origin.place.text}
+                  {index < placesOfOrigin.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {country && country != "Not provided" && (
+            <p>
+              <strong>Item location:</strong> {country}
+            </p>
+          )}
+
+          {provider && provider != "Not provided" && (
+            <p>
+              <strong>Data provided by:</strong> {provider}
+            </p>
+          )}
+
+          {sourceLink && (
             <>
               <p>
-                <strong>Physical Description:</strong>{" "}
-                <span
-                  dangerouslySetInnerHTML={{ __html: physicalDescription }}
-                />
+                <strong>Info link:</strong>{" "}
+                {isLinkValid === null ? (
+                  "checking link..."
+                ) : isLinkValid ? (
+                  <a
+                    href={sourceLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      maxWidth: "100%",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      verticalAlign: "bottom",
+                    }}
+                    title={sourceLink}
+                  >
+                    {sourceLink}
+                  </a>
+                ) : (
+                  "None"
+                )}
               </p>
-              <div>
-                <strong>Materials:</strong>{" "}
-                {materials.length > 0 ? (
-                  materials.map((material, index) => (
-                    <span key={index}>
-                      {material}
-                      {index < materials.length - 1 ? ", " : ""}
-                    </span>
-                  ))
-                ) : (
-                  <span>Not listed</span>
-                )}
-              </div>
-              <div>
-                <strong>Techniques:</strong>{" "}
-                {techniques.length > 0 ? (
-                  techniques.map((technique, index) => (
-                    <span key={index}>
-                      {technique}
-                      {index < techniques.length - 1 ? ", " : ""}
-                    </span>
-                  ))
-                ) : (
-                  <span>Not listed</span>
-                )}
-              </div>
+              <p>(Click for external item link)</p>
             </>
           )}
-          <div>
-            <strong>Origins:</strong>{" "}
-            {origins.length > 0 ? (
-              origins.map((origin, index) => (
-                <span key={index}>
-                  {origin}
-                  {index < origins.length - 1 ? ", " : ""}
-                </span>
-              ))
-            ) : (
-              <span>Not listed</span>
-            )}
-          </div>
           <div
             style={{
               display: "flex",

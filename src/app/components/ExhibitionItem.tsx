@@ -1,32 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import classes from "./exhibitionItem.module.css";
 import LoadMoreButton from "./LoadMoreButton";
-import prepareItemData from "../utils/prepareItemData";
 import { Item } from "../types";
+import { checkSourceLink } from "../utils/checkSourceLink";
 
-interface ExhibitionItemProps {
+const ExhibitionItem = ({
+  item,
+  onRemove,
+}: {
   item: Item;
   onRemove: (id: string) => void;
-}
-
-const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [showInfo, setShowInfo] = useState(false);
+}) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showInfo, setShowInfo] = useState<boolean>(false);
+  const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
 
   const {
+    baseImageUrl,
     imageUrls,
     title,
-    searchSource,
     description,
     physicalDescription,
     materials,
     techniques,
-    origins,
+    placesOfOrigin,
     imagesCount,
-    makerName,
-  } = prepareItemData(item);
+    subject,
+    maker,
+    productionDates,
+    date,
+    provider,
+    country,
+    sourceLink,
+    searchSource,
+  } = item;
+
+  useEffect(() => {
+    const validateLink = async () => {
+      if (item.sourceLink) {
+        const isValid = await checkSourceLink(item.sourceLink);
+        setIsLinkValid(isValid);
+      } else {
+        setIsLinkValid(false);
+      }
+    };
+
+    validateLink();
+  }, [item.sourceLink]);
 
   const handleNextImage = () => {
     if (currentImageIndex < imagesCount - 1) {
@@ -60,7 +82,7 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
 
         <Image
           src={currentImageUrl}
-          alt={title.join("")}
+          alt={title}
           fill={true}
           style={{ objectFit: "contain" }}
           quality={100}
@@ -95,39 +117,129 @@ const ExhibitionItem = ({ item, onRemove }: ExhibitionItemProps) => {
         <div className={classes.itemInfo}>
           <h2
             className={classes.title}
-            dangerouslySetInnerHTML={{ __html: title[0] }}
+            dangerouslySetInnerHTML={{ __html: title }}
           />
-          {searchSource === "va" && (
+
+          {maker && maker.length > 0 && maker[0].name != "Not provided" && (
             <p>
-              <strong>Maker:</strong> {makerName}
+              <strong>Makers:</strong>{" "}
+              {item.maker?.map((maker, index) => (
+                <span key={index}>
+                  {maker.name}
+                  {index < (item.maker?.length ?? 0) - 1 ? " | " : ""}
+                </span>
+              ))}
             </p>
           )}
-          <p>
-            <strong>Description:</strong>{" "}
-            <span dangerouslySetInnerHTML={{ __html: description }} />
-          </p>
-          {searchSource === "va" && (
+          {productionDates &&
+            productionDates.length > 0 &&
+            productionDates[0].date?.text && (
+              <p>
+                <strong>Date:</strong> {productionDates[0].date?.text}
+              </p>
+            )}
+
+          {date && date != "Not provided" && (
+            <p>
+              <strong>Date:</strong> {date}
+            </p>
+          )}
+
+          {subject && subject != "Not provided" && <p>{subject}</p>}
+
+          {description && description != "Not provided" && (
+            <p>
+              <strong>Description:</strong>{" "}
+              <span dangerouslySetInnerHTML={{ __html: description }} />
+            </p>
+          )}
+
+          {physicalDescription && physicalDescription != "Not provided" && (
+            <p>
+              <strong>Physical Description:</strong>{" "}
+              <span dangerouslySetInnerHTML={{ __html: physicalDescription }} />
+            </p>
+          )}
+
+          {materials && materials.length > 0 && (
+            <div style={{ fontSize: "14px" }}>
+              <strong>Materials:</strong>{" "}
+              {materials.map((material, index) => (
+                <span key={index}>
+                  {material.text}
+                  {index < materials.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {techniques && techniques.length > 0 && (
+            <div style={{ fontSize: "14px" }}>
+              <strong>Techniques:</strong>{" "}
+              {techniques.map((technique, index) => (
+                <span key={index}>
+                  {technique.text}
+                  {index < techniques.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {placesOfOrigin && placesOfOrigin.length > 0 && (
+            <div style={{ fontSize: "14px" }}>
+              <strong>Origins:</strong>{" "}
+              {placesOfOrigin.map((origin, index) => (
+                <span key={index}>
+                  {origin.place.text}
+                  {index < placesOfOrigin.length - 1 ? " | " : ""}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {country && country != "Not provided" && (
+            <p>
+              <strong>Item location:</strong> {country}
+            </p>
+          )}
+
+          {provider && provider != "Not provided" && (
+            <p>
+              <strong>Data provided by:</strong> {provider}
+            </p>
+          )}
+
+          {sourceLink && (
             <>
               <p>
-                <strong>Physical Description:</strong>{" "}
-                <span
-                  dangerouslySetInnerHTML={{ __html: physicalDescription }}
-                />
+                <strong>Info link:</strong>{" "}
+                {isLinkValid === null ? (
+                  "checking link..."
+                ) : isLinkValid ? (
+                  <a
+                    href={sourceLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      maxWidth: "100%",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      verticalAlign: "bottom",
+                    }}
+                    title={sourceLink}
+                  >
+                    {sourceLink}
+                  </a>
+                ) : (
+                  "None"
+                )}
               </p>
-              <p>
-                <strong>Materials:</strong>{" "}
-                {materials.length > 0 ? materials.join(", ") : "Not listed"}
-              </p>
-              <p>
-                <strong>Techniques:</strong>{" "}
-                {techniques.length > 0 ? techniques.join(", ") : "Not listed"}
-              </p>
+              <p>(Click for external item link)</p>
             </>
           )}
-          <p>
-            <strong>Origins:</strong>{" "}
-            {origins.length > 0 ? origins.join(", ") : "Not listed"}
-          </p>
+
           <button
             className={classes.removeButton}
             onClick={() => onRemove(item.id)}

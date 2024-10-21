@@ -19,28 +19,31 @@ export interface Origin {
   };
 }
 
-export interface ImageMeta {
-  assetRef: string;
-}
-
 export interface Item {
   id: string;
   searchSource: string;
   maker?: Maker[];
-  title?: string;
+  title: string;
   description?: string;
   physicalDescription?: string;
   materials?: Material[];
   techniques?: Technique[];
-  origins?: Origin[];
+  placesOfOrigin?: Origin[];
   baseImageUrl: string;
-
-  images?: {
-    _iiif_image: string;
-    imagesMeta?: ImageMeta[];
-  };
+  imageUrls?: string[];
+  imagesCount: number;
   provider?: string;
+  productionDates?: {
+    date: { text: string };
+    association: { text: string };
+  }[];
+  briefDescription?: string;
+  date?: string;
+  subject?: string;
+  country?: string;
+  sourceLink?: string;
 }
+
 export interface ArtItem {
   id: string;
   searchSource: string;
@@ -53,34 +56,34 @@ export interface ArtItem {
   fullImage?: string;
   dataProvider?: string;
   description?: string;
+  subject?: string;
+  country?: string;
+  sourceLink?: string;
 }
 
-export interface fullItem {
-  id: string;
-  searchSource: string;
+// export interface fullItem {
+//   id: string;
+//   searchSource: string;
 
-  title: string;
-  maker: Maker[];
-  date?: string;
-  baseImageUrl: string;
-  description: string;
-  physicalDescription: string;
-  materials: Material[];
-  techniques: Technique[];
-  placesOfOrigin?: {
-    place: { text: string; id?: string };
-    association: { text: string };
-  }[];
-  productionDates?: {
-    date: { text: string };
-    association: { text: string };
-  }[];
-  images?: {
-    _iiif_image: string;
-    imagesMeta?: ImageMeta[];
-  };
-  briefDescription: string;
-}
+//   title: string;
+//   maker: Maker[];
+//   date?: string;
+//   baseImageUrl: string;
+//   description: string;
+//   physicalDescription: string;
+//   materials: Material[];
+//   techniques: Technique[];
+//   placesOfOrigin?: {
+//     place: { text: string; id?: string };
+//     association: { text: string };
+//   }[];
+
+//   images?: {
+//     _iiif_image: string;
+//     imagesMeta?: ImageMeta[];
+//   };
+//   briefDescription: string;
+// }
 
 export interface Results {
   va: ArtItem[];

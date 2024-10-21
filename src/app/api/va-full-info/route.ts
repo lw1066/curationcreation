@@ -1,6 +1,7 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
-import { ImageMeta, fullItem } from "../../types";
+import { Item } from "../../types";
+import sanitizeHtml from "sanitize-html";
 
 interface ArtistMakerPerson {
   name: { text: string; id?: string };
@@ -8,12 +9,6 @@ interface ArtistMakerPerson {
   note: string;
 }
 
-interface ImageResponse {
-  _iiif_image: string;
-  imagesMeta: ImageMeta[];
-}
-
-// Define types for the response data
 interface VAResponse {
   record: {
     systemNumber: string;
@@ -34,16 +29,19 @@ interface VAResponse {
     briefDescription?: string;
   };
   meta: {
-    images: { _iiif_image: string; _images_meta: ImageMeta[] };
+    images?: { _iiif_image?: string; _images_meta?: { assetRef: string }[] };
   };
 }
 
-interface RequestBody {
-  id: string;
-}
+const sanitizeHTML = (htmlString: string): string => {
+  return sanitizeHtml(htmlString, {
+    allowedTags: ["i", "em", "b", "strong", "br", "p"],
+    allowedAttributes: {}, // Add allowed attributes if needed
+  });
+};
 
 export async function POST(req: Request) {
-  const { id }: RequestBody = await req.json();
+  const { id }: { id: string } = await req.json();
 
   try {
     const vaResponse = await axios.get<VAResponse>(
@@ -53,6 +51,11 @@ export async function POST(req: Request) {
     const record = vaResponse.data.record;
     const metaRecord = vaResponse.data.meta;
 
+    if (!record || !metaRecord) {
+      throw new Error("Record or MetaRecord data missing.");
+    }
+
+    // Handle makers
     const makers = record.artistMakerPerson
       ? record.artistMakerPerson.map((person) => ({
           name: person.name.text,
@@ -60,25 +63,50 @@ export async function POST(req: Request) {
         }))
       : [{ name: "No maker", id: "No ID" }];
 
-    const images: ImageResponse = {
-      _iiif_image: metaRecord.images?._iiif_image || "/images/no_image.png",
-      imagesMeta: metaRecord.images?._images_meta || [],
-    };
+    // Handle images
+    const imageUrls: string[] = metaRecord.images?._images_meta
+      ? metaRecord.images._images_meta.map((image) => {
+          return `https://framemark.vam.ac.uk/collections/${image.assetRef}/full/full/0/default.jpg`;
+        })
+      : [];
 
-    const vaFullItem: fullItem = {
+    const imagesCount = imageUrls?.length || 0;
+
+    // Handle materials
+    const materials =
+      record.materials && record.materials.length > 0
+        ? record.materials.map((material) => {
+            return { text: material.text, id: material.id };
+          })
+        : [];
+
+    //Handle techniques
+    const techniques =
+      record.techniques && record.techniques.length > 0
+        ? record.techniques.map((technique) => {
+            return { text: technique.text, id: technique.id };
+          })
+        : [];
+
+    const vaFullItem: Item = {
       id: record.systemNumber,
       searchSource: "va",
       maker: makers,
-      title: record.titles?.[0]?.title || "Untitled",
-      description: record.summaryDescription || "No description",
-      physicalDescription: record.physicalDescription || "No description",
-      materials: record.materials || [{ text: "none", id: "none" }],
-      techniques: record.techniques || [],
+      title: sanitizeHTML(record.titles?.[0]?.title || "Untitled"),
+      description: sanitizeHTML(record.summaryDescription || "Not provided"),
+      physicalDescription: sanitizeHTML(
+        record.physicalDescription || "Not provided"
+      ),
+      materials: materials,
+      techniques: techniques,
       placesOfOrigin: record.placesOfOrigin || [],
       productionDates: record.productionDates || [],
-      images: images,
-      baseImageUrl: metaRecord.images?._iiif_image || "/images/no_image.png",
-      briefDescription: record.briefDescription || "No description",
+      imageUrls: imageUrls,
+      imagesCount: imagesCount,
+      baseImageUrl:
+        `${metaRecord.images?._iiif_image}/full/full/0/default.jpg` ||
+        "/images/no_image.png",
+      briefDescription: sanitizeHTML(record.briefDescription || "Not provided"),
     };
 
     console.log("vaFullItem ----", vaFullItem);
