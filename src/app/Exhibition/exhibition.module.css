@@ -1,5 +1,3 @@
-/* exhibition.module.css */
-
 .exhibitionPage {
   padding: 20px;
 }
@@ -13,21 +11,20 @@
 .exhibitionGrid {
   display: grid;
   gap: 20px;
-  grid-template-columns: repeat(
-    1,
-    1fr
-  ); /* Default to 1 column on small screens */
+  justify-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(275px, 1fr));
+  margin-bottom: 100px;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 919px) {
   .exhibitionGrid {
-    grid-template-columns: repeat(2, 1fr); /* 2 columns for medium screens */
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (min-width: 1200px) {
   .exhibitionGrid {
-    grid-template-columns: repeat(3, 1fr); /* 3 columns for large screens */
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 

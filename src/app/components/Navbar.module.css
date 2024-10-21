@@ -26,9 +26,8 @@
 
 .largeC {
   font-size: 130px;
-  /* line-height: 1; */
   color: transparent;
-  animation: changeColorC 8s forwards;
+  animation: changeColorC 8s forwards 0.5s;
 }
 
 .textStack {
@@ -47,7 +46,7 @@
 
 .second {
   opacity: 0;
-  animation: fadeIn 2s 3s forwards, blueToWhite 2.5s 5.5s forwards;
+  animation: fadeIn 2s 3s forwards, blueToWhite 3s 6.25s forwards;
   color: blue;
   line-height: 45px;
 }
@@ -119,7 +118,6 @@
 
   .navLinks {
     gap: 1rem;
-
     width: 100%;
     justify-content: flex-end;
   }
@@ -144,5 +142,11 @@
   }
   .logoText {
     font-size: 40px;
+  }
+}
+
+@media (max-width: 340px) {
+  .navLinks {
+    font-size: 18px;
   }
 }

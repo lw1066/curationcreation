@@ -84,29 +84,30 @@ const ExhibitionItem = ({
           fill={true}
           style={{ objectFit: "contain" }}
           quality={100}
-          sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="(max-width: 900px) 100vw, (max-width: 1200px) 50vw, 33vw"
           onLoad={() => setLoading(false)}
         />
       </div>
 
       <div className={classes.imageButtonsContainer}>
+        {imagesCount > 1 && (
+          <LoadMoreButton
+            onClick={handlePreviousImage}
+            disabled={currentImageIndex === 0}
+            text="Back"
+          />
+        )}
+
         <button className={classes.infoButton} onClick={handleInfoClick}>
           {showInfo ? "Close" : "Info"}
         </button>
 
         {imagesCount > 1 && (
-          <>
-            <LoadMoreButton
-              onClick={handlePreviousImage}
-              disabled={currentImageIndex === 0}
-              text="Back"
-            />
-            <LoadMoreButton
-              onClick={handleNextImage}
-              disabled={currentImageIndex === imagesCount - 1}
-              text="Next"
-            />
-          </>
+          <LoadMoreButton
+            onClick={handleNextImage}
+            disabled={currentImageIndex === imagesCount - 1}
+            text="Next"
+          />
         )}
       </div>
       <div

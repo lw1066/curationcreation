@@ -303,7 +303,7 @@ const SearchPage: React.FC = () => {
         </>
       )}
       <div className={classes.searchFormContainer}>
-        <div className={classes.vaSearchInstructionsContainer}>
+        <div className={classes.searchInstructionsContainer}>
           <p>
             The search term can be anything! An artist, a place, an object - see
             what you find!
@@ -322,12 +322,20 @@ const SearchPage: React.FC = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter artist, place, type"
+            placeholder="Enter artist, place, object..."
             required
-            style={{ width: "65%", marginBottom: "20px" }}
+            style={{ width: "65%", marginBottom: "20px", fontSize: "1.25rem" }}
           />
-          <div className={classes.vaSearchInstructionsContainer}>
-            <p>Choose collection(s) to search for items.</p>
+          <div className={classes.searchInstructionsContainer}>
+            <p>Choose your collection(s)</p>
+            <p>
+              The Victoria and Albert Museum - Over 1m items spanning 5000
+              years!
+            </p>
+            <p>
+              Europeana - Over 32m images from 2000 European cultural
+              institutions!
+            </p>
           </div>
 
           <div style={{ display: "flex", gap: "20px" }}>
@@ -378,6 +386,7 @@ const SearchPage: React.FC = () => {
                 alt="Europeana Search"
                 width={45}
                 height={45}
+                style={{ marginTop: "7px" }}
               />
             </div>
           </div>
