@@ -8,7 +8,7 @@ export const checkSourceLink = async (sourceLink: string): Promise<boolean> => {
     });
 
     return response ? true : false;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

@@ -18,7 +18,6 @@ const ExhibitionItem = ({
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
 
   const {
-    baseImageUrl,
     imageUrls,
     title,
     description,
@@ -34,7 +33,6 @@ const ExhibitionItem = ({
     provider,
     country,
     sourceLink,
-    searchSource,
   } = item;
 
   useEffect(() => {
