@@ -14,8 +14,7 @@
 .navLinks a {
   text-decoration: none;
   color: white;
-  /* font-weight: 500; */
-  transition: transform 0.3s, color 0.3s, font-weight 0.3s;
+  transition: transform 0.5s, color 0.5s, font-weight 0.5s;
 }
 
 .activeLink {
@@ -25,7 +24,6 @@
 }
 
 .navLinks a:hover {
-  transform: scale(1.05);
   color: green;
 }
 

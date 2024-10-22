@@ -35,20 +35,23 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(27, 249, 2, 0.5);
-  border: none;
+  background-color: transparent;
+  border: 2px solid green;
   border-radius: 50%;
   height: 60px;
   width: 60px;
-  color: black;
+  color: green;
   font-size: 1.25rem;
-  padding: 10px;
+  padding: 0;
   cursor: pointer;
   z-index: 1001;
 }
 
 .imageCount {
-  font-size: 1rem;
+  font-size: 0.75rem;
+  margin: 0 5px;
+  padding-top: 3px;
+  line-height: 1;
 }
 
 .prevButton {
@@ -60,7 +63,9 @@
 }
 
 .imageButton:hover {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: green;
+  color: black;
+  border: none;
 }
 
 @media (max-width: 768px) {
