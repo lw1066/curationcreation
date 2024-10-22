@@ -1,0 +1,73 @@
+.carouselContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0);
+  z-index: 1000;
+  overflow: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.carouselContainer::-webkit-scrollbar {
+  width: 0px; /* Hide scrollbar width */
+  display: none; /* Safari and Chrome */
+}
+
+.carouselImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 95%;
+  padding: 0;
+  margin: 0;
+}
+
+.imageButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(27, 249, 2, 0.5);
+  border: none;
+  border-radius: 50%;
+  height: 60px;
+  width: 60px;
+  color: black;
+  font-size: 1.25rem;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.imageCount {
+  font-size: 1rem;
+}
+
+.prevButton {
+  left: 10px;
+}
+
+.nextButton {
+  right: 10px;
+}
+
+.imageButton:hover {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+  @media (hover: none) and (pointer: coarse) {
+    .prevButton,
+    .nextButton {
+      display: none; /* Hide buttons on touch devices */
+    }
+  }
+}

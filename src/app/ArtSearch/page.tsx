@@ -290,197 +290,206 @@ const SearchPage: React.FC = () => {
   };
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      {fullItem && (
-        <>
-          {console.log("295 in artSearch:::::", fullItem)}
-          <FullItemCard
-            item={fullItem}
-            close={closeFullItemDisplay}
-            handleMakerSearch={handleMakerSearch}
-          />
-        </>
-      )}
-      <div className={classes.searchFormContainer}>
-        <div className={classes.searchInstructionsContainer}>
-          <p>
-            The search term can be anything! An artist, a place, an object - see
-            what you find!
-          </p>
-        </div>
-        <form
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onSubmit={handleSubmit}
-        >
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Enter artist, place, object..."
-            required
-            style={{ width: "65%", marginBottom: "20px", fontSize: "1.25rem" }}
-          />
-          <div className={classes.searchInstructionsContainer}>
-            <p>Choose your collection(s)</p>
-            <p>
-              The Victoria and Albert Museum - Over 1m items spanning 5000
-              years!
-            </p>
-            <p>
-              Europeana - Over 32m images from 2000 European cultural
-              institutions!
-            </p>
-          </div>
-
-          <div style={{ display: "flex", gap: "20px" }}>
-            <div
-              onClick={() => {
-                setSearchType((prevType) =>
-                  prevType === "va"
-                    ? "europeana"
-                    : prevType === "europeana"
-                    ? "both"
-                    : "va"
-                );
-              }}
-              style={{ cursor: "pointer" }}
-              className={`${classes.searchLogoContainer} ${
-                searchType === "va" || searchType === "both"
-                  ? classes.activeImage
-                  : ""
-              }`}
-            >
-              <Image
-                src="/images/Victoria_and_Albert_Museum_Logo.svg"
-                alt="VA Search"
-                width={45}
-                height={45}
-              />
-            </div>
-
-            <div
-              onClick={() => {
-                setSearchType((prevType) =>
-                  prevType === "europeana"
-                    ? "va"
-                    : prevType === "va"
-                    ? "both"
-                    : "europeana"
-                );
-              }}
-              style={{ cursor: "pointer" }}
-              className={`${classes.searchLogoContainer} ${
-                searchType === "europeana" || searchType === "both"
-                  ? classes.activeImage
-                  : ""
-              }`}
-            >
-              <Image
-                src="/images/euroLogo.png"
-                alt="Europeana Search"
-                width={45}
-                height={45}
-                style={{ marginTop: "7px" }}
-              />
-            </div>
-          </div>
-
-          <LoadMoreButton
-            onClick={() => {}}
-            text="Search"
-            fontSize="14px"
-            width="55px"
-            height="55px"
-          />
-        </form>
-        {results.info.record_count > 0 && (
-          <div className={classes.filtersContainer}>
-            <p>
-              <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
-                {animatedRecordCount}
-              </span>{" "}
-              items found {"   "} with{" "}
-              <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
-                {animatedImageCount}
-              </span>{" "}
-              images
-            </p>
-
-            {searchType != "europeana" && (
-              <>
-                <input
-                  type="checkbox"
-                  id="onlyWithImages"
-                  checked={onlyWithImages}
-                  onChange={(e) => setOnlyWithImages(e.target.checked)}
-                />
-                <label htmlFor="onlyWithImages" style={{ marginLeft: "10px" }}>
-                  Only show items with images
-                </label>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
+    <>
       <div>
-        {loading && (
-          <div className={classes.fetchSpinnerContainer}>
-            <div className={classes.spinner}></div>
-          </div>
+        {error && <p>{error}</p>}
+        {fullItem && (
+          <>
+            {console.log("295 in artSearch:::::", fullItem)}
+            <FullItemCard
+              item={fullItem}
+              close={closeFullItemDisplay}
+              handleMakerSearch={handleMakerSearch}
+            />
+          </>
         )}
-        {filteredResults.length > 0 && (
-          <div className={classes.resultsGrid}>
-            {filteredResults.map((item) => {
-              // console.log("item in filterfunction----", item);
-              return (
-                <div className={classes.itemCard} key={item.id}>
-                  <div
-                    style={{
-                      position: "relative",
-                      width: "100%",
-                      height: "200px",
-                    }}
-                  >
-                    {imageLoadingStatus[item.id] !== false && (
-                      <div className={classes.imageSpinnerContainer}>
-                        <div className={classes.spinner}></div>
-                      </div>
-                    )}
+        <div className={classes.searchFormContainer}>
+          <div className={classes.searchInstructionsContainer}>
+            <p>
+              The search term can be anything! An artist, a place, an object -
+              see what you find!
+            </p>
+          </div>
+          <form
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onSubmit={handleSubmit}
+          >
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Enter artist, place, object..."
+              required
+              style={{
+                width: "65%",
+                marginBottom: "20px",
+                fontSize: "1.25rem",
+              }}
+            />
+            <div className={classes.searchInstructionsContainer}>
+              <p>Choose your collection(s)</p>
+              <p>
+                The Victoria and Albert Museum - Over 1m items spanning 5000
+                years!
+              </p>
+              <p>
+                Europeana - Over 32m images from 2000 European cultural
+                institutions!
+              </p>
+            </div>
 
-                    <Image
-                      src={
-                        item.baseImageUrl &&
-                        item.baseImageUrl !== "/images/no_image.png"
-                          ? item.baseImageUrl
-                          : "/images/no_image.png"
-                      }
-                      fill
-                      sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      quality={100}
-                      style={{ objectFit: "contain" }}
-                      alt={item.title}
-                      onLoad={() => handleImageLoad(item.id)}
-                      onClick={() => handleFullInfoRequest(item)}
-                    />
+            <div style={{ display: "flex", gap: "20px" }}>
+              <div
+                onClick={() => {
+                  setSearchType((prevType) =>
+                    prevType === "va"
+                      ? "europeana"
+                      : prevType === "europeana"
+                      ? "both"
+                      : "va"
+                  );
+                }}
+                style={{ cursor: "pointer" }}
+                className={`${classes.searchLogoContainer} ${
+                  searchType === "va" || searchType === "both"
+                    ? classes.activeImage
+                    : ""
+                }`}
+              >
+                <Image
+                  src="/images/Victoria_and_Albert_Museum_Logo.svg"
+                  alt="VA Search"
+                  width={45}
+                  height={45}
+                />
+              </div>
+
+              <div
+                onClick={() => {
+                  setSearchType((prevType) =>
+                    prevType === "europeana"
+                      ? "va"
+                      : prevType === "va"
+                      ? "both"
+                      : "europeana"
+                  );
+                }}
+                style={{ cursor: "pointer" }}
+                className={`${classes.searchLogoContainer} ${
+                  searchType === "europeana" || searchType === "both"
+                    ? classes.activeImage
+                    : ""
+                }`}
+              >
+                <Image
+                  src="/images/euroLogo.png"
+                  alt="Europeana Search"
+                  width={45}
+                  height={45}
+                  style={{ marginTop: "7px" }}
+                />
+              </div>
+            </div>
+
+            <LoadMoreButton
+              onClick={() => {}}
+              text="Search"
+              fontSize="14px"
+              width="55px"
+              height="55px"
+            />
+          </form>
+          {results.info.record_count > 0 && (
+            <div className={classes.filtersContainer}>
+              <p>
+                <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                  {animatedRecordCount}
+                </span>{" "}
+                items found {"   "} with{" "}
+                <span style={{ fontSize: "1.25rem", fontWeight: "700" }}>
+                  {animatedImageCount}
+                </span>{" "}
+                images
+              </p>
+
+              {searchType != "europeana" && (
+                <>
+                  <input
+                    type="checkbox"
+                    id="onlyWithImages"
+                    checked={onlyWithImages}
+                    onChange={(e) => setOnlyWithImages(e.target.checked)}
+                  />
+                  <label
+                    htmlFor="onlyWithImages"
+                    style={{ marginLeft: "10px" }}
+                  >
+                    Only show items with images
+                  </label>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div>
+          {loading && (
+            <div className={classes.fetchSpinnerContainer}>
+              <div className={classes.spinner}></div>
+            </div>
+          )}
+          {filteredResults.length > 0 && (
+            <div className={classes.resultsGrid}>
+              {filteredResults.map((item) => {
+                // console.log("item in filterfunction----", item);
+                return (
+                  <div className={classes.itemCard} key={item.id}>
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "100%",
+                        height: "200px",
+                      }}
+                    >
+                      {imageLoadingStatus[item.id] !== false && (
+                        <div className={classes.imageSpinnerContainer}>
+                          <div className={classes.spinner}></div>
+                        </div>
+                      )}
+
+                      <Image
+                        src={
+                          item.baseImageUrl &&
+                          item.baseImageUrl !== "/images/no_image.png"
+                            ? item.baseImageUrl
+                            : "/images/no_image.png"
+                        }
+                        fill
+                        sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        quality={100}
+                        style={{ objectFit: "contain" }}
+                        alt={item.title}
+                        onLoad={() => handleImageLoad(item.id)}
+                        onClick={() => handleFullInfoRequest(item)}
+                      />
+                    </div>
+                    <p className={classes.title}>{item.title}</p>
                   </div>
-                  <p className={classes.title}>{item.title}</p>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        {hasMore && !loading && (
-          <LoadMoreButton onClick={loadMoreResults} disabled={loading} />
-        )}
+                );
+              })}
+            </div>
+          )}
+          {hasMore && !loading && (
+            <LoadMoreButton onClick={loadMoreResults} disabled={loading} />
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

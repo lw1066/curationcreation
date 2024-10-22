@@ -6,6 +6,29 @@
   background-color: #030303;
 }
 
+.navLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.navLinks a {
+  text-decoration: none;
+  color: white;
+  /* font-weight: 500; */
+  transition: transform 0.3s, color 0.3s, font-weight 0.3s;
+}
+
+.activeLink {
+  color: green !important;
+  transform: scale(1.2);
+  font-weight: 900 !important;
+}
+
+.navLinks a:hover {
+  transform: scale(1.05);
+  color: green;
+}
+
 .logoContainer {
   flex: 1;
   display: flex;
@@ -91,22 +114,6 @@
   100% {
     color: white;
   }
-}
-
-.navLinks {
-  display: flex;
-  gap: 2rem;
-}
-
-.navLinks a {
-  text-decoration: none;
-  color: #ffffff;
-  font-weight: 500;
-  transition: color 0.3s;
-}
-
-.navLinks a:hover {
-  color: #0070f3;
 }
 
 @media (max-width: 802px) {

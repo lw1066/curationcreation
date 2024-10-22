@@ -4,9 +4,13 @@ import { useState, useEffect } from "react";
 import classes from "./exhibition.module.css";
 import ExhibitionItem from "../components/ExhibitionItem";
 import { Item } from "../types";
+import ImageCarousel from "../components/ImageCarousel";
+import LoadMoreButton from "../components/LoadMoreButton";
 
 const ExhibitionPage = () => {
   const [exhibitionItems, setExhibitionItems] = useState<Item[]>([]);
+  const [showCarousel, setShowCarousel] = useState<boolean>(false);
+  const [carouselImages, setCarouselImages] = useState<string[]>([]);
 
   useEffect(() => {
     const storedItems = localStorage.getItem("exhibitionItems");
@@ -21,27 +25,67 @@ const ExhibitionPage = () => {
     setExhibitionItems(updatedItems);
   };
 
-  return (
-    <div className={classes.exhibitionPage}>
-      <h1 className={classes.greeting}>
-        There are {exhibitionItems.length} item
-        {exhibitionItems.length !== 1 ? "s" : ""} in your exhibition
-      </h1>
+  const handleShowCarousel = () => {
+    const carouselImages = exhibitionItems.flatMap((item) => {
+      return (
+        item.imageUrls?.filter(
+          (url): url is string => typeof url === "string"
+        ) || []
+      );
+    });
+    setCarouselImages(carouselImages);
+    setShowCarousel(true);
+    console.log(exhibitionItems);
+  };
 
-      <div className={classes.exhibitionGrid}>
-        {exhibitionItems.length > 0 ? (
-          exhibitionItems.map((item) => (
-            <ExhibitionItem
-              key={item.id}
-              item={item}
-              onRemove={handleRemoveItem}
-            />
-          ))
-        ) : (
-          <p>No items in the exhibition yet.</p>
-        )}
+  const handleCloseCarousel = () => {
+    setShowCarousel(false);
+  };
+
+  return (
+    <>
+      {showCarousel && (
+        <ImageCarousel
+          carouselImages={carouselImages}
+          handleCloseCarousel={handleCloseCarousel}
+        />
+      )}
+      <div className={classes.exhibitionPage}>
+        <h1 className={classes.greeting}>
+          {exhibitionItems.length} item
+          {exhibitionItems.length !== 1 ? "s" : ""} in exhibition
+        </h1>
+
+        <div className={classes.exhibitionInstructions}>
+          <p>Scroll down to look at your items and info.</p>
+          <p> Take a look at just the images by clicking below...</p>
+          <LoadMoreButton
+            text="Images only!"
+            width="55px"
+            height="55px"
+            onClick={handleShowCarousel}
+          />
+
+          <h2 style={{ marginTop: "30px", fontSize: "1.25rem" }}>
+            Your Exhibition Items!
+          </h2>
+        </div>
+
+        <div className={classes.exhibitionGrid}>
+          {exhibitionItems.length > 0 ? (
+            exhibitionItems.map((item) => (
+              <ExhibitionItem
+                key={item.id}
+                item={item}
+                onRemove={handleRemoveItem}
+              />
+            ))
+          ) : (
+            <p>No items in the exhibition yet.</p>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

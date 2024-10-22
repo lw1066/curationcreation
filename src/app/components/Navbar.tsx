@@ -1,15 +1,22 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
-import styles from "./Navbar.module.css";
+import classes from "./Navbar.module.css"; // Changed styles to classes
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 
 const Navbar: React.FC = () => {
+  const pathname = usePathname();
+
+  const isActive = (path: string) => pathname === path;
+
   return (
-    <nav className={styles.navbar}>
-      <div className={styles.logoContainer}>
-        <div className={styles.logoImage}>
+    <nav className={classes.navbar}>
+      <div className={classes.logoContainer}>
+        <div className={classes.logoImage}>
           <Image
-            className={styles.logo}
+            className={classes.logo}
             src="/images/logo.png"
             alt="Curator-Creator logo"
             width={100}
@@ -18,18 +25,30 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        <div className={styles.logoText}>
-          <h1 className={styles.largeC}>C</h1>
-          <div className={styles.textStack}>
-            <div className={styles.first}>uration</div>
-            <div className={styles.second}>reation</div>
+        <div className={classes.logoText}>
+          <h1 className={classes.largeC}>C</h1>
+          <div className={classes.textStack}>
+            <div className={classes.first}>uration</div>
+            <div className={classes.second}>reation</div>
           </div>
         </div>
       </div>
-      <div className={styles.navLinks}>
-        <Link href="/">Home</Link>
-        <Link href="/ArtSearch">Art Search</Link>
-        <Link href="/Exhibition">Exhibition</Link>
+      <div className={classes.navLinks}>
+        <Link href="/" className={isActive("/") ? classes.activeLink : ""}>
+          Home
+        </Link>
+        <Link
+          href="/ArtSearch"
+          className={isActive("/ArtSearch") ? classes.activeLink : ""}
+        >
+          Art Search
+        </Link>
+        <Link
+          href="/Exhibition"
+          className={isActive("/Exhibition") ? classes.activeLink : ""}
+        >
+          Exhibition
+        </Link>
       </div>
     </nav>
   );

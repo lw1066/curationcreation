@@ -16,6 +16,20 @@
   margin-bottom: 100px;
 }
 
+.exhibitionInstructions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.exhibitionInstructions p {
+  width: 50%;
+  text-align: center;
+}
+
 @media (min-width: 919px) {
   .exhibitionGrid {
     grid-template-columns: repeat(2, 1fr);
