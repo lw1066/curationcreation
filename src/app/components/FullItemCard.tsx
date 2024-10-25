@@ -27,13 +27,7 @@ const FullItemCard = ({
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
 
   const { user } = useAuth();
-  const {
-    exhibitionItems,
-    removeItem,
-    addItem,
-    fetchItems,
-    setExhibitionItems,
-  } = useExhibition();
+  const { exhibitionItems, removeItem, addItem, fetchItems } = useExhibition();
 
   const {
     baseImageUrl,

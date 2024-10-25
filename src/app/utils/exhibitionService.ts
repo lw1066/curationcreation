@@ -8,10 +8,11 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/firebase";
 import { Item } from "../types";
+import { User } from "firebase/auth";
 
 // Fetch exhibition items for a given user
 export const fetchExhibitionItems = async (
-  currentUser: any
+  currentUser: User | null
 ): Promise<Item[]> => {
   if (!currentUser) return [];
 
@@ -32,7 +33,7 @@ export const fetchExhibitionItems = async (
 
 // Add an item to the exhibition items array for a given user
 export const addExhibitionItem = async (
-  user: any,
+  user: User,
   item: Item
 ): Promise<void> => {
   if (!user) throw new Error("User must be logged in to add an item.");
@@ -62,7 +63,7 @@ export const addExhibitionItem = async (
 
 // Remove an item from the exhibition items array for a given user
 export const removeExhibitionItem = async (
-  user: any,
+  user: User,
   itemId: string
 ): Promise<void> => {
   if (!user) throw new Error("User must be logged in to remove an item.");

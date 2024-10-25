@@ -67,7 +67,7 @@ export const ExhibitionProvider = ({ children }: { children: ReactNode }) => {
     if (user) {
       fetchItems();
     }
-  }, [user]);
+  }, [user, fetchItems]);
 
   return (
     <ExhibitionContext.Provider

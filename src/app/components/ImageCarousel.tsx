@@ -15,6 +15,18 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
 
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? carouselImages.length - 1 : prevIndex - 1
+    );
+  };
+
   // Detect touchscreen device
   useEffect(() => {
     setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
@@ -62,19 +74,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
         window.removeEventListener("touchend", handleTouchEnd);
       };
     }
-  }, [isTouchDevice]);
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === carouselImages.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const handlePrev = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? carouselImages.length - 1 : prevIndex - 1
-    );
-  };
+  }, [isTouchDevice, handleNext, handlePrev]);
 
   const imagesSeen = currentIndex;
   const imagesRemaining = carouselImages.length - currentIndex - 1;
