@@ -48,6 +48,7 @@ interface ApiResponse {
     EItemsInfo: {
       record_count: number;
       image_count: number;
+      filterpool_count: number;
     };
   };
 
@@ -57,7 +58,7 @@ interface ApiResponse {
 const sanitizeHTML = (htmlString: string): string => {
   return sanitizeHtml(htmlString, {
     allowedTags: ["i", "em", "b", "strong", "br", "p"],
-    allowedAttributes: {}, // Add allowed attributes if needed
+    allowedAttributes: {},
   });
 };
 
@@ -72,6 +73,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
     const EItemsInfo = {
       record_count: 0,
       image_count: 0,
+      filterpool_count: 0,
     };
 
     const fetchAndFilter = async (cursorMark: string | null) => {
@@ -91,6 +93,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
         );
         EItemsInfo.record_count = response.data.totalResults;
         EItemsInfo.image_count = response.data.totalResults;
+        EItemsInfo.filterpool_count += response.data.items.length;
 
         const hasEnglishLanguage = (item: EuropeanaItem): boolean | void => {
           const isEnglishOnly =
@@ -106,8 +109,6 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
             return true;
           }
         };
-
-        // console.log(response.data.items[0]);
 
         const newFilteredItems = response.data.items.filter(
           (item: EuropeanaItem) => {
@@ -155,20 +156,38 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
         filteredItems.push(...newFilteredItems);
 
         nextCursor = response.data.nextCursor || null;
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        throw new Error("Data fetch error");
+      } catch (apiError) {
+        if (axios.isAxiosError(apiError)) {
+          console.error("Axios error fetching data:", apiError.message);
+
+          throw new Error(
+            `Failed to fetch data from the Europeana API: ${apiError.message}`
+          );
+        } else {
+          console.error("Unknown API error:", apiError);
+          throw new Error("An unknown error occurred while fetching the data.");
+        }
       }
     };
 
-    while (filteredItems.length < 10) {
-      await fetchAndFilter(nextCursor);
-      if (!nextCursor) {
-        break;
-      }
-    }
+    let attempts = 0;
 
-    // console.log(filteredItems[1]);
+    while (filteredItems.length < 10 && attempts < 50) {
+      try {
+        await fetchAndFilter(nextCursor);
+        if (!nextCursor) {
+          break;
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error("Error in fetchAndFilter:", error.message);
+        } else {
+          console.error("Unknown error occurred in fetchAndFilter:", error);
+        }
+        throw error;
+      }
+      attempts++;
+    }
 
     const items = filteredItems.map((item) => ({
       id: item.id,
@@ -252,8 +271,6 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       imagesCount: 1,
     }));
 
-    console.log(items);
-
     return NextResponse.json({
       status: 200,
       success: true,
@@ -265,19 +282,23 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse>> {
       nextCursor: nextCursor,
     });
   } catch (error) {
-    console.error("Error fetching data:", error);
-    return NextResponse.json({
-      status: 500,
-      success: false,
-      message: "Failed to fetch data from Europeana API",
-      data: {
-        europeana: [],
-        EItemsInfo: {
-          record_count: 0,
-          image_count: 0,
+    console.error("Error in POST handler:", (error as Error).message);
+
+    return NextResponse.json(
+      {
+        status: 500,
+        success: false,
+        message: (error as Error).message || "An unexpected error occurred",
+        data: {
+          europeana: [],
+          EItemsInfo: {
+            record_count: 0,
+            image_count: 0,
+            filterpool_count: 0,
+          },
         },
       },
-      nextCursor: undefined,
-    });
+      { status: 500 } // Ensures correct HTTP status code
+    );
   }
 }

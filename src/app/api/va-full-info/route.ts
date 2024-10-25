@@ -36,14 +36,18 @@ interface VAResponse {
 const sanitizeHTML = (htmlString: string): string => {
   return sanitizeHtml(htmlString, {
     allowedTags: ["i", "em", "b", "strong", "br", "p"],
-    allowedAttributes: {}, // Add allowed attributes if needed
+    allowedAttributes: {},
   });
 };
 
 export async function POST(req: Request) {
-  const { id }: { id: string } = await req.json();
-
   try {
+    const { id }: { id: string } = await req.json();
+
+    if (!id) {
+      throw new Error("Missing ID parameter in the request.");
+    }
+
     const vaResponse = await axios.get<VAResponse>(
       `https://api.vam.ac.uk/v2/museumobject/${id}`
     );
@@ -52,7 +56,7 @@ export async function POST(req: Request) {
     const metaRecord = vaResponse.data.meta;
 
     if (!record || !metaRecord) {
-      throw new Error("Record or MetaRecord data missing.");
+      throw new Error("Incomplete data: record or metaRecord is missing.");
     }
 
     // Handle makers
@@ -80,7 +84,7 @@ export async function POST(req: Request) {
           })
         : [];
 
-    //Handle techniques
+    // Handle techniques
     const techniques =
       record.techniques && record.techniques.length > 0
         ? record.techniques.map((technique) => {
@@ -109,22 +113,35 @@ export async function POST(req: Request) {
       briefDescription: sanitizeHTML(record.briefDescription || "Not provided"),
     };
 
-    console.log("vaFullItem ----", vaFullItem);
-
     return NextResponse.json({
       status: 200,
       success: true,
-      message: "Art retrieved!",
+      message: "Art retrieved successfully!",
       data: {
         vaFullItem,
       },
     });
   } catch (error) {
-    console.error("Error fetching data:", error);
+    let errorMessage = "An unknown error occurred.";
+
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        errorMessage = `API Error: ${error.response.statusText} (Status: ${error.response.status})`;
+      } else if (error.request) {
+        errorMessage = "No response received from the API. Please try again.";
+      } else {
+        errorMessage = "Network error. Please check your connection.";
+      }
+    } else if (error instanceof Error) {
+      errorMessage = `Error: ${error.message}`;
+    }
+
+    console.error("Error fetching V&A item:", errorMessage);
+
     return NextResponse.json({
       status: 500,
       success: false,
-      message: "Failed to fetch data from APIs",
+      message: errorMessage,
     });
   }
 }

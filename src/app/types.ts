@@ -61,32 +61,8 @@ export interface ArtItem {
   sourceLink?: string;
 }
 
-// export interface fullItem {
-//   id: string;
-//   searchSource: string;
-
-//   title: string;
-//   maker: Maker[];
-//   date?: string;
-//   baseImageUrl: string;
-//   description: string;
-//   physicalDescription: string;
-//   materials: Material[];
-//   techniques: Technique[];
-//   placesOfOrigin?: {
-//     place: { text: string; id?: string };
-//     association: { text: string };
-//   }[];
-
-//   images?: {
-//     _iiif_image: string;
-//     imagesMeta?: ImageMeta[];
-//   };
-//   briefDescription: string;
-// }
-
 export interface Results {
   va: ArtItem[];
   europeana: ArtItem[]; // Add Europeana results
-  info: { record_count: number; image_count: number };
+  info: { record_count: number; image_count: number; filterpool_count: number };
 }

@@ -58,29 +58,59 @@ export async function POST(req: Request) {
   try {
     const { query, makerId, start = 1 }: ArtSearchRequest = await req.json();
 
-    let vaResponse;
-
-    if (makerId) {
-      vaResponse = await axios.get(
-        `https://api.vam.ac.uk/v2/objects/search?id_person=${makerId}`,
-        {
-          params: {
-            page: start,
-          },
-        }
-      );
-    } else if (query) {
-      vaResponse = await axios.get("https://api.vam.ac.uk/v2/objects/search/", {
-        params: {
-          q: query,
-          page: start,
-        },
-      });
-    } else {
+    // Validate input
+    if (!query && !makerId) {
       return NextResponse.json<ArtSearchResponse>({
         status: 400,
         success: false,
         message: "Either query or makerId must be provided",
+      });
+    }
+
+    let vaResponse;
+    const params = { page: start };
+
+    try {
+      if (makerId) {
+        vaResponse = await axios.get(
+          `https://api.vam.ac.uk/v2/objects/search?id_person=${makerId}`,
+          { params }
+        );
+      } else if (query) {
+        vaResponse = await axios.get(
+          "https://api.vam.ac.uk/v2/objects/search",
+          {
+            params: { q: query, page: start },
+          }
+        );
+      }
+    } catch (apiError) {
+      if (axios.isAxiosError(apiError)) {
+        // Handle errors in axios request
+        console.error("API request error:", apiError.message);
+        const status = apiError.response?.status || 500;
+        return NextResponse.json<ArtSearchResponse>({
+          status,
+          success: false,
+          message: `Failed to fetch data from the V&A API: ${apiError.message}`,
+        });
+      } else {
+        // Handle other errors
+        console.error("Unknown API error:", apiError);
+        return NextResponse.json<ArtSearchResponse>({
+          status: 500,
+          success: false,
+          message: "An unknown error occurred while fetching the data.",
+        });
+      }
+    }
+
+    // Check if response data exists
+    if (!vaResponse || !vaResponse.data.records) {
+      return NextResponse.json<ArtSearchResponse>({
+        status: 404,
+        success: false,
+        message: "No data found for the given search criteria.",
       });
     }
 
@@ -105,18 +135,18 @@ export async function POST(req: Request) {
     return NextResponse.json<ArtSearchResponse>({
       status: 200,
       success: true,
-      message: "Art retrieved!",
+      message: "Art retrieved successfully!",
       data: {
         va: vaItems,
         vaItemsInfo: vaItemsInfo,
       },
     });
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Internal server error:", error);
     return NextResponse.json<ArtSearchResponse>({
       status: 500,
       success: false,
-      message: "Failed to fetch data from the API",
+      message: "An internal server error occurred.",
     });
   }
 }

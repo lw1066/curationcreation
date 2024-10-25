@@ -6,6 +6,7 @@ import ExhibitionItem from "../components/ExhibitionItem";
 import { Item } from "../types";
 import ImageCarousel from "../components/ImageCarousel";
 import LoadMoreButton from "../components/LoadMoreButton";
+import { showUserFeedback } from "../utils/showUserFeedback";
 
 const ExhibitionPage = () => {
   const [exhibitionItems, setExhibitionItems] = useState<Item[]>([]);
@@ -13,9 +14,20 @@ const ExhibitionPage = () => {
   const [carouselImages, setCarouselImages] = useState<string[]>([]);
 
   useEffect(() => {
-    const storedItems = localStorage.getItem("exhibitionItems");
-    if (storedItems) {
-      setExhibitionItems(JSON.parse(storedItems));
+    try {
+      const storedItems = localStorage.getItem("exhibitionItems");
+      if (storedItems) {
+        setExhibitionItems(JSON.parse(storedItems));
+      }
+    } catch (error) {
+      console.error(
+        "Error retrieving exhibition items from localStorage:",
+        error
+      );
+      showUserFeedback(
+        "There was a problem retrieving your items from local storage - try again later"
+      );
+      setExhibitionItems([]);
     }
   }, []);
 
@@ -66,8 +78,8 @@ const ExhibitionPage = () => {
             onClick={handleShowCarousel}
           />
 
-          <h2 style={{ marginTop: "30px", fontSize: "1.25rem" }}>
-            Your Exhibition Items!
+          <h2 className={classes.greeting} style={{ marginTop: "30px" }}>
+            Your Exhibition!
           </h2>
         </div>
 
