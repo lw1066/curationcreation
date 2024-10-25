@@ -5,6 +5,7 @@ import Image from "next/image";
 import classes from "./Navbar.module.css"; // Changed styles to classes
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import Signout from "./Signout";
 
 const Navbar: React.FC = () => {
   const pathname = usePathname();
@@ -50,6 +51,9 @@ const Navbar: React.FC = () => {
           Exhibition
         </Link>
       </div>
+      <span style={{ position: "absolute", top: "10px", right: "10px" }}>
+        <Signout />
+      </span>
     </nav>
   );
 };

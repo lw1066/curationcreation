@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import GoToTopButton from "./components/GoToTopButton";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ExhibitionProvider } from "./contexts/ExhibitionContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,9 +30,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Navbar />
-        <GoToTopButton />
-        {children}
+        <AuthProvider>
+          <ExhibitionProvider>
+            <Navbar />
+            <GoToTopButton />
+            {children}
+          </ExhibitionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,12 +1,15 @@
 import { useState, MouseEvent, useEffect, SyntheticEvent } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useExhibition } from "../contexts/ExhibitionContext";
 import Image from "next/image";
 import classes from "./fullItemCard.module.css";
 import TriangleButton from "./TriangleButton";
 import LoadMoreButton from "./LoadMoreButton";
 import { Item } from "../types";
 import { checkSourceLink } from "../utils/checkSourceLink";
+import { showUserFeedback } from "../utils/showUserFeedback";
+import Link from "next/link";
 
-// Define prop types for VaItemDisplay component
 interface FullItemCardProps {
   item: Item;
   close: () => void;
@@ -22,6 +25,15 @@ const FullItemCard = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [isInExhibition, setIsInExhibition] = useState<boolean>(false);
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
+
+  const { user } = useAuth();
+  const {
+    exhibitionItems,
+    removeItem,
+    addItem,
+    fetchItems,
+    setExhibitionItems,
+  } = useExhibition();
 
   const {
     baseImageUrl,
@@ -55,6 +67,14 @@ const FullItemCard = ({
     validateLink();
   }, [item.sourceLink]);
 
+  useEffect(() => {
+    const isItemInExhibition = exhibitionItems.some(
+      (exhibitItem) => exhibitItem.id === item.id
+    );
+
+    setIsInExhibition(isItemInExhibition);
+  }, [item, exhibitionItems]);
+
   const handleClickInside = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
   };
@@ -81,51 +101,27 @@ const FullItemCard = ({
     e.currentTarget.src = baseImageUrl;
   };
 
-  const addItemToExhibition = () => {
-    const existingItems = localStorage.getItem("exhibitionItems");
-    const exhibitionItems: Item[] = existingItems
-      ? JSON.parse(existingItems)
-      : [];
-
-    const isItemAlreadyAdded = exhibitionItems.some(
-      (exhibitItem) => exhibitItem.id === item.id
-    );
-
-    if (!isItemAlreadyAdded) {
-      exhibitionItems.push(item);
-      localStorage.setItem("exhibitionItems", JSON.stringify(exhibitionItems));
-      setIsInExhibition(true);
-      alert("Item added to exhibition!");
+  const addItemToExhibition = async () => {
+    if (!user) {
+      showUserFeedback("Sign in to add items");
+      return;
     }
+    await addItem(item);
+    fetchItems();
+    setIsInExhibition(true);
+    showUserFeedback("Item added to exhibition!");
   };
 
-  const removeItemFromExhibition = () => {
-    const existingItems = localStorage.getItem("exhibitionItems");
-    let exhibitionItems: Item[] = existingItems
-      ? JSON.parse(existingItems)
-      : [];
-
-    exhibitionItems = exhibitionItems.filter(
-      (exhibitItem) => exhibitItem.id !== item.id
-    );
-
-    localStorage.setItem("exhibitionItems", JSON.stringify(exhibitionItems));
+  const removeItemFromExhibition = async () => {
+    if (!user) {
+      showUserFeedback("Sign in to add items");
+      return;
+    }
+    await removeItem(item.id);
+    fetchItems();
     setIsInExhibition(false);
-    alert("Item removed from exhibition.");
+    showUserFeedback("Item removed from exhibition.");
   };
-
-  useEffect(() => {
-    const existingItems = localStorage.getItem("exhibitionItems");
-    const exhibitionItems: Item[] = existingItems
-      ? JSON.parse(existingItems)
-      : [];
-
-    const isItemInExhibition = exhibitionItems.some(
-      (exhibitItem) => exhibitItem.id === item.id
-    );
-
-    setIsInExhibition(isItemInExhibition);
-  }, [item]);
 
   const currentImageUrl =
     imageUrls?.[currentImageIndex] || "/images/no_image.png";
@@ -312,21 +308,35 @@ const FullItemCard = ({
               paddingBottom: "20px",
             }}
           >
-            {isInExhibition ? (
-              <button
-                className={classes.exhibitionButton}
-                onClick={removeItemFromExhibition}
-              >
-                Remove from Exhibition
-              </button>
+            {user ? (
+              isInExhibition ? (
+                <button
+                  className={classes.exhibitionButton}
+                  onClick={removeItemFromExhibition}
+                >
+                  Remove from Exhibition
+                </button>
+              ) : (
+                <button
+                  className={classes.exhibitionButton}
+                  onClick={addItemToExhibition}
+                  style={{ color: "white", borderColor: "white" }}
+                >
+                  Add to Exhibition
+                </button>
+              )
             ) : (
-              <button
-                className={classes.exhibitionButton}
-                onClick={addItemToExhibition}
-                style={{ color: "white", borderColor: "white" }}
-              >
-                Add to Exhibition
-              </button>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <Link href="/Login">
+                  <LoadMoreButton
+                    text="Login / signup to create exhibition"
+                    fontSize="11px"
+                    height="100px"
+                    width="100px"
+                    onClick={() => {}}
+                  />
+                </Link>
+              </div>
             )}
           </div>
         </div>

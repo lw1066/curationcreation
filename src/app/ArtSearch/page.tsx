@@ -178,7 +178,7 @@ const SearchPage: React.FC = () => {
         id: item.id,
         searchSource: "euro",
         title: item.title,
-        maker: item.maker?.name,
+        maker: item.maker.name || [],
         date: item.date || "unknown",
         baseImageUrl: item.baseImageUrl || "/No_Image_Available.jpg",
         description: item.description,
@@ -352,30 +352,23 @@ const SearchPage: React.FC = () => {
 
   const filteredResults = [...filteredVaResults, ...results.europeana];
 
+  //Prepare animated counts
   const animatedRecordCount = useCountAnimation(
     results.info.record_count || 0,
     3000
   );
-  // const animatedImageCount = useCountAnimation(
-  //   results.info.image_count || 0,
-  //   3000
-  // );
-
   const animatedEuroReturn = useCountAnimation(
     europeanaReturnedItemsCount || 0,
     3000
   );
-
   const animatedFilterpool = useCountAnimation(
     results.info.filterpool_count || 0,
     3000
   );
-
   const animatedVaReturn = useCountAnimation(
     vaReturnedItemsCount - filteredVaCount || 0,
     3000
   );
-
   const animatedVapool = useCountAnimation(vaReturnedItemsCount || 0, 3000);
 
   const handleImageLoad = (id: string) => {

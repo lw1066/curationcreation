@@ -1,21 +1,19 @@
 import { useEffect, useState } from "react";
+import { useExhibition } from "../contexts/ExhibitionContext";
 import Image from "next/image";
 import classes from "./exhibitionItem.module.css";
 import LoadMoreButton from "./LoadMoreButton";
 import { Item } from "../types";
 import { checkSourceLink } from "../utils/checkSourceLink";
+import { showUserFeedback } from "../utils/showUserFeedback";
 
-const ExhibitionItem = ({
-  item,
-  onRemove,
-}: {
-  item: Item;
-  onRemove: (id: string) => void;
-}) => {
+const ExhibitionItem = ({ item }: { item: Item }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [showInfo, setShowInfo] = useState<boolean>(false);
   const [isLinkValid, setIsLinkValid] = useState<boolean | null>(null);
+
+  const { removeItem } = useExhibition();
 
   const {
     imageUrls,
@@ -64,6 +62,11 @@ const ExhibitionItem = ({
 
   const handleInfoClick = () => {
     setShowInfo((prev) => !prev);
+  };
+
+  const handleRemoveItem = (itemID: string) => {
+    removeItem(itemID);
+    showUserFeedback("item removed from exhibition");
   };
 
   const currentImageUrl =
@@ -241,7 +244,7 @@ const ExhibitionItem = ({
 
           <button
             className={classes.removeButton}
-            onClick={() => onRemove(item.id)}
+            onClick={() => handleRemoveItem(item.id)}
           >
             Remove
           </button>
