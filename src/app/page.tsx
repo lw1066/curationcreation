@@ -90,10 +90,10 @@ export default function Home() {
           <p style={{ fontWeight: "600" }}>The Victoria and Albert Museum</p>
         </div>
         <p style={{ fontStyle: "italic", width: "80%" }}>
-          "We share a 5,000 year old story of creativity through exhibitions,
-          events, educational programmes, digital experiences, conservation,
-          research and an ever-evolving national collection of over 2.8 million
-          objects spanning every creative discipline."
+          &quot;We share a 5,000 year old story of creativity through
+          exhibitions, events, educational programmes, digital experiences,
+          conservation, research and an ever-evolving national collection of
+          over 2.8 million objects spanning every creative discipline.&quot;
         </p>
         <div
           style={{
@@ -121,11 +121,11 @@ export default function Home() {
           <p style={{ fontWeight: "600" }}>Europeana</p>
         </div>
         <p style={{ fontStyle: "italic", width: "80%" }}>
-          "We display digital cultural heritage from over 2000 different
+          &quot;We display digital cultural heritage from over 2000 different
           European providing institutions... Why? To inspire and inform fresh
           perspectives and open conversations about our history and culture.
           Discover artworks, books, music, and videos on art, newspapers,
-          archaeology, fashion, science, sport, and much more."
+          archaeology, fashion, science, sport, and much more.&quot;
         </p>
       </div>
     </>

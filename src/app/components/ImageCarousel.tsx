@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import classes from "./imageCarousel.module.css";
 import TriangleButton from "./TriangleButton";
@@ -14,8 +14,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
+  const touchStartXRef = useRef<number | null>(null);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
@@ -46,21 +45,21 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   useEffect(() => {
     if (isTouchDevice) {
       const handleTouchStart = (e: TouchEvent) => {
-        setTouchStartX(e.changedTouches[0].screenX);
+        touchStartXRef.current = e.changedTouches[0].screenX;
       };
 
       const handleTouchEnd = (e: TouchEvent) => {
-        if (touchStartX === null) return;
+        if (touchStartXRef.current === null) return;
 
         const touchEndX = e.changedTouches[0].screenX;
-        const swipeDistance = touchStartX - touchEndX;
+        const swipeDistance = touchStartXRef.current - touchEndX;
 
         // Check for a significant swipe
         if (swipeDistance > 50) handleNext();
         else if (swipeDistance < -50) handlePrev();
 
         // Reset touchStartX for the next touch
-        setTouchStartX(null);
+        touchStartXRef.current = null;
       };
 
       window.addEventListener("touchstart", handleTouchStart);
