@@ -67,12 +67,26 @@
   color: black;
   border: none;
 }
+.swipeIndicator {
+  position: fixed;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  z-index: 1000;
+  font-size: 16px;
+  display: none;
+}
 
 @media (max-width: 768px) {
   @media (hover: none) and (pointer: coarse) {
     .prevButton,
     .nextButton {
-      display: none; /* Hide buttons on touch devices */
+      display: none;
+    }
+
+    .swipeIndicator {
+      display: flex;
     }
   }
 }

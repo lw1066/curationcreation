@@ -14,6 +14,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTouchDevice, setIsTouchDevice] = useState<boolean>(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [showSwipeIndicator, setShowSwipeIndicator] = useState<boolean>(false);
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
@@ -43,34 +45,29 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
   // Swipe handling
   useEffect(() => {
     if (isTouchDevice) {
-      let touchStartX: number = 0;
-      let touchEndX: number = 0;
-
       const handleTouchStart = (e: TouchEvent) => {
-        touchStartX = e.changedTouches[0].screenX;
+        setTouchStartX(e.changedTouches[0].screenX);
       };
 
-      const handleTouchMove = (e: TouchEvent) => {
-        touchEndX = e.changedTouches[0].screenX;
-      };
+      const handleTouchEnd = (e: TouchEvent) => {
+        if (touchStartX === null) return;
 
-      const handleTouchEnd = () => {
-        if (touchStartX - touchEndX > 50) {
-          handleNext(); // Swipe left to go to the next image
-        }
+        const touchEndX = e.changedTouches[0].screenX;
+        const swipeDistance = touchStartX - touchEndX;
 
-        if (touchStartX - touchEndX < -50) {
-          handlePrev(); // Swipe right to go to the previous image
-        }
+        // Check for a significant swipe
+        if (swipeDistance > 50) handleNext();
+        else if (swipeDistance < -50) handlePrev();
+
+        // Reset touchStartX for the next touch
+        setTouchStartX(null);
       };
 
       window.addEventListener("touchstart", handleTouchStart);
-      window.addEventListener("touchmove", handleTouchMove);
       window.addEventListener("touchend", handleTouchEnd);
 
       return () => {
         window.removeEventListener("touchstart", handleTouchStart);
-        window.removeEventListener("touchmove", handleTouchMove);
         window.removeEventListener("touchend", handleTouchEnd);
       };
     }
@@ -81,6 +78,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   return (
     <div className={classes.carouselContainer}>
+      <div className={classes.swipeIndicator}>
+        <p>
+          &#10094; {imagesSeen + 1} of {carouselImages.length} &#10095;
+        </p>
+      </div>
       <div className={classes.carouselImageWrapper}>
         <Image
           src={carouselImages[currentIndex]}

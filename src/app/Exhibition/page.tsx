@@ -47,30 +47,34 @@ const ExhibitionPage = () => {
               {exhibitionItems.length !== 1 ? "s" : ""} in exhibition
             </h1>
 
-            <div className={classes.exhibitionInstructions}>
-              <p>Scroll down to look at your items and info.</p>
-              <p> Take a look at just the images by clicking below...</p>
-              <LoadMoreButton
-                text="Images only!"
-                width="55px"
-                height="55px"
-                onClick={handleShowCarousel}
-              />
+            {exhibitionItems.length > 0 && (
+              <div className={classes.exhibitionInstructions}>
+                <p>Scroll down to look at your items and info.</p>
+                <p> Take a look at just the images by clicking below...</p>
+                <LoadMoreButton
+                  text="Images only!"
+                  width="55px"
+                  height="55px"
+                  onClick={handleShowCarousel}
+                />
 
-              <h2 className={classes.greeting} style={{ marginTop: "30px" }}>
-                Your Exhibition!
-              </h2>
-            </div>
+                <h2 className={classes.greeting} style={{ marginTop: "30px" }}>
+                  Your Exhibition!
+                </h2>
+              </div>
+            )}
 
-            <div className={classes.exhibitionGrid}>
-              {exhibitionItems.length > 0 ? (
-                exhibitionItems.map((item) => (
+            {exhibitionItems.length === 0 && (
+              <p style={{ textAlign: "center" }}>Add items in Art search</p>
+            )}
+
+            {exhibitionItems.length > 0 && (
+              <div className={classes.exhibitionGrid}>
+                {exhibitionItems.map((item) => (
                   <ExhibitionItem key={item.id} item={item} />
-                ))
-              ) : (
-                <p>No items in the exhibition yet.</p>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </>
         ) : (
           <Link href="/Login">

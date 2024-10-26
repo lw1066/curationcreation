@@ -8,6 +8,7 @@ import {
   ReactNode,
   Dispatch,
   SetStateAction,
+  useCallback,
 } from "react";
 import { Item } from "../types";
 import {
@@ -40,12 +41,12 @@ export const ExhibitionProvider = ({ children }: { children: ReactNode }) => {
   const [exhibitionItems, setExhibitionItems] = useState<Item[]>([]);
   const { user } = useAuth();
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     if (user) {
       const items = await fetchExhibitionItems(user);
       setExhibitionItems(items);
     }
-  };
+  }, [user]);
 
   const addItem = async (item: Item) => {
     if (user) {
