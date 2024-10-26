@@ -164,27 +164,35 @@ const FullItemCard = ({
           />
 
           {maker && maker.length > 0 && maker[0].name != "Not provided" && (
-            <p>
-              <strong>Makers:</strong>{" "}
-              {item.maker?.map((maker, index) => (
-                <span key={index}>
-                  {maker.id ? (
-                    <span
-                      onClick={() => {
-                        handleMakerSearch(maker.id!);
-                        close();
-                      }}
-                      className={classes.clickableMaker}
-                    >
-                      {maker.name}
-                    </span>
-                  ) : (
-                    maker.name
-                  )}
-                  {index < (item.maker?.length ?? 0) - 1 ? " | " : ""}
-                </span>
-              ))}
-            </p>
+            <span>
+              <p>
+                <strong>Makers:</strong>{" "}
+                {item.maker?.map((maker, index) => (
+                  <span key={index}>
+                    {maker.id ? (
+                      <>
+                        <span
+                          onClick={() => {
+                            handleMakerSearch(maker.id!);
+                            close();
+                          }}
+                          className={classes.clickableMaker}
+                        >
+                          {maker.name}
+                        </span>{" "}
+                      </>
+                    ) : (
+                      maker.name
+                    )}
+                    {index < (item.maker?.length ?? 0) - 1 ? " | " : ""}
+                  </span>
+                ))}
+              </p>
+
+              <p style={{ fontSize: "10px" }}>
+                (If red click for more involving person)
+              </p>
+            </span>
           )}
 
           {productionDates &&
