@@ -1,12 +1,12 @@
 # Curation Creation - <span title="Hosted on Netlify: https://curationcreation.netlify.app">([Demo](https://curationcreation.netlify.app/))</span>
 
-### An app to allow users to explore two large online art and culture catalogues, and then create their own exhibition from the objects they find.
+### An app to allow users to explore online art and culture catalogues, and create their own exhibition from the objects they find.
 
 Built over about 50 hours using Next.js, Typescript and Firebase - for the back-end authorization and data storage.
 
 The two APIs used to access the online catalogues are provided by: [The V&A Museum](https://www.vam.ac.uk/) and [Europeana](https://www.europeana.eu/en).
 
-Please leave any feedback or issues/bugs [here](https://github.com/lw1066/curationcreation/issues).
+Please visit the [demo](https://curationcreation.netlify.app/) hosted on Netlify. You can signup or use the test account - email: test@testEmail.com with password: test1234. Thanks for leaving any feedback or issues/bugs [here](https://github.com/lw1066/curationcreation/issues).
 
 ## Local setup instructions - If you prefer to run the app locally
 
