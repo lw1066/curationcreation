@@ -165,7 +165,7 @@ const FullItemCard = ({
 
           {maker && maker.length > 0 && maker[0].name != "Not provided" && (
             <span>
-              <p>
+              <div>
                 <strong>Makers:</strong>{" "}
                 {item.maker?.map((maker, index) => (
                   <span key={index}>
@@ -187,7 +187,7 @@ const FullItemCard = ({
                     {index < (item.maker?.length ?? 0) - 1 ? " | " : ""}
                   </span>
                 ))}
-              </p>
+              </div>
 
               <p style={{ fontSize: "10px" }}>
                 (If red click for more involving person)

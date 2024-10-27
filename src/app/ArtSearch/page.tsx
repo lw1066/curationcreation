@@ -286,11 +286,13 @@ const SearchPage: React.FC = () => {
             pageNum: nextPage,
           });
 
-          setVaReturnedItemsCount((prev) => prev + newVaResults.va.length);
+          const updatedVaReturnedItemsCount =
+            vaReturnedItemsCount + newVaResults.va.length;
+
+          setVaReturnedItemsCount(updatedVaReturnedItemsCount);
 
           moreVaResults =
-            results.info.record_count >
-            results.va.length + newVaResults.va.length;
+            newVaResults.vaItemsInfo.record_count > updatedVaReturnedItemsCount;
         } finally {
           setLoading(false);
         }
@@ -378,6 +380,18 @@ const SearchPage: React.FC = () => {
     }));
   };
 
+  const toggleSearchType = (type: "va" | "europeana") => {
+    setSearchType((prevType) => {
+      if (prevType === type) {
+        return prevType;
+      } else if (prevType === "both") {
+        return type;
+      } else {
+        return "both";
+      }
+    });
+  };
+
   return (
     <>
       <div>
@@ -425,13 +439,7 @@ const SearchPage: React.FC = () => {
             <div style={{ display: "flex", gap: "20px" }}>
               <div
                 onClick={() => {
-                  setSearchType((prevType) =>
-                    prevType === "va"
-                      ? "europeana"
-                      : prevType === "europeana"
-                      ? "both"
-                      : "va"
-                  );
+                  toggleSearchType("va");
                 }}
                 style={{ cursor: "pointer" }}
                 className={`${classes.searchLogoContainer} ${
@@ -450,13 +458,7 @@ const SearchPage: React.FC = () => {
 
               <div
                 onClick={() => {
-                  setSearchType((prevType) =>
-                    prevType === "europeana"
-                      ? "va"
-                      : prevType === "va"
-                      ? "both"
-                      : "europeana"
-                  );
+                  toggleSearchType("europeana");
                 }}
                 style={{ cursor: "pointer" }}
                 className={`${classes.searchLogoContainer} ${
@@ -606,7 +608,6 @@ const SearchPage: React.FC = () => {
           {filteredResults.length > 0 && (
             <div className={classes.resultsGrid}>
               {filteredResults.map((item) => {
-                // console.log("item in filterfunction----", item);
                 return (
                   <div className={classes.itemCard} key={item.id}>
                     <div

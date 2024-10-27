@@ -75,7 +75,11 @@ export default function Home() {
             marginTop: "15px",
           }}
         >
-          <Link href="https://www.vam.ac.uk/">
+          <Link
+            href="https://www.vam.ac.uk/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Image
               src="/images/Victoria_and_Albert_Museum_Logo.svg"
               alt="VA Search"
@@ -105,7 +109,11 @@ export default function Home() {
             marginTop: "15px",
           }}
         >
-          <Link href="https://www.europeana.eu/en">
+          <Link
+            href="https://www.europeana.eu/en"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Image
               src="/images/euroLogo.png"
               alt="Europeana Search"

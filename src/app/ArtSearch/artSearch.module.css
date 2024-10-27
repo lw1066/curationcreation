@@ -37,12 +37,11 @@
   margin: 10px 0px 20px 0;
   overflow: hidden;
   border: 2px solid transparent;
-  transition: transform 0.5s;
+  transition: transform 0.3s;
 }
 
 .searchLogoContainer:hover {
-  /* border-color: blue; */
-  transform: scale(1.2);
+  transform: scale(1.05);
 }
 
 .activeImage {
