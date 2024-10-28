@@ -3,7 +3,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase/firebase";
 import { useRouter } from "next/navigation";
 import classes from "./login.module.css";
-import { useExhibition } from "../contexts/ExhibitionContext"; // Import context
+import { useExhibition } from "../contexts/ExhibitionContext";
 import LoadMoreButton from "./LoadMoreButton";
 import { showUserFeedback } from "../utils/showUserFeedback";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import Link from "next/link";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // const [loginError, setLoginError] = useState<string | null>(null);
+
   const router = useRouter();
   const { fetchItems } = useExhibition();
 
@@ -42,6 +42,7 @@ const Login = () => {
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        id="email"
         placeholder="Email"
         autoComplete="email"
       />
@@ -52,6 +53,7 @@ const Login = () => {
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        id="password"
         placeholder="Password"
         autoComplete="current-password"
       />

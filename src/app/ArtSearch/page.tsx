@@ -426,6 +426,7 @@ const SearchPage: React.FC = () => {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Enter artist, place, object..."
+              name="searchTerm"
               required
               style={{
                 width: "65%",
@@ -499,9 +500,10 @@ const SearchPage: React.FC = () => {
                   <div
                     style={{
                       display: "flex",
+                      flexDirection: "column",
                       justifyContent: "center",
                       alignItems: "center",
-                      gap: "10px",
+                      gap: "2px",
                     }}
                   >
                     <Image
@@ -533,9 +535,10 @@ const SearchPage: React.FC = () => {
                     <div
                       style={{
                         display: "flex",
+                        flexDirection: "column",
                         justifyContent: "center",
                         alignItems: "center",
-                        gap: "10px",
+                        gap: "2px",
                       }}
                     >
                       <Image
